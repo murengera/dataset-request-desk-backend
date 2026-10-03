@@ -18,12 +18,12 @@ services:
       retries: 5
 
   web:
-    build: .
+    build: ./backend
     container_name: candidate-pack-api
     restart: unless-stopped
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
+      - ./backend:/app
     ports:
       - "8000:8000"
     environment:
@@ -41,7 +41,7 @@ services:
     develop:
       watch:
         - action: sync
-          path: .
+          path: ./backend
           target: /app
           ignore:
             - venv/
@@ -49,7 +49,7 @@ services:
             - __pycache__/
             - "*.pyc"
         - action: rebuild
-          path: requirements.txt
+          path: ./backend/requirements.txt
 
 volumes:
   postgres_data:

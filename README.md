@@ -42,6 +42,7 @@ Run the full automated test suite (26 tests covering auth, workflow invariants, 
 
 ```bash
 # Using local virtualenv:
+cd backend
 python manage.py test
 
 # Or inside Docker:
@@ -55,24 +56,24 @@ docker compose exec web python manage.py test
 If you prefer running without Docker:
 
 ```bash
-# 1. Create and activate virtual environment
+# 1. Backend setup
+cd backend
 python3 -m venv venv
 source venv/bin/activate
-
-# 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Ensure PostgreSQL is running and configure .env
-cp .env.example .env
-# Adjust DB_NAME, DB_USER, DB_PASSWORD, DB_PORT if needed
-
-# 4. Run migrations and seed data
+# 2. Database migrations and seed data
 python manage.py migrate
 python manage.py seed_users
 python manage.py import_episodes seed/episodes.csv
 
-# 5. Start development server
+# 3. Start backend API server (runs on http://localhost:8000/)
 python manage.py runserver
+
+# 4. Frontend Angular setup (in a separate terminal)
+cd frontend
+npm install
+npm start # runs on http://localhost:4200/
 ```
 
 ---

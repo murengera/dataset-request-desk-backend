@@ -60,33 +60,37 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r backend/requirements.txt
 
       # 4. Django system checks (validates configuration, models, urls)
       - name: Run Django system checks
+        working-directory: backend
         run: |
           python manage.py check
 
       # 5. Apply database migrations to test PostgreSQL schema creation
       - name: Apply database migrations
+        working-directory: backend
         run: |
           python manage.py migrate --noinput
 
       # 6. Seed initial test users and episodes
       - name: Seed test data
+        working-directory: backend
         run: |
           python manage.py seed_users
-          python manage.py import_episodes
+          python manage.py import_episodes seed/episodes.csv
 
       # 7. Run automated test suite
       - name: Run automated test suite
+        working-directory: backend
         run: |
           python manage.py test
 
       # 8. Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t daltonbigirimana5/dataset-request-desk:latest .
+          docker build -t daltonbigirimana5/dataset-request-desk:latest ./backend
 
       # 9. Push to Docker Hub only when code is pushed to main
       - name: Log in to Docker Hub
