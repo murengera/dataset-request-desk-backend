@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: dataset_desk_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dataset_request_desk
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d dataset_request_desk" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: candidate-pack-api
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-docker-secret-key
+      - DJANGO_DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=*
+      - DB_NAME=dataset_request_desk
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      db:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+          ignore:
+            - venv/
+            - .venv/
+            - __pycache__/
+            - "*.pyc"
+        - action: rebuild
+          path: requirements.txt
+
+volumes:
+  postgres_data:
