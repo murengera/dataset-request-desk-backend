@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset Request Desk - Robotics Data Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-card-hover: #273549;
+            --border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-light: rgba(59, 130, 246, 0.15);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.15);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.15);
+            --info: #06b6d4;
+            --info-bg: rgba(6, 182, 212, 0.15);
+            --purple: #8b5cf6;
+            --purple-bg: rgba(139, 92, 246, 0.15);
+            --radius: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* Top Navigation */
+        header {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .role-tag {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            padding: 0.15rem 0.45rem;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .role-client { background: var(--info-bg); color: var(--info); border: 1px solid var(--info); }
+        .role-operator { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
+        .role-admin { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 0.5rem 0.9rem;
+            border-radius: var(--radius);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover:not(:disabled) { background-color: var(--accent-hover); }
+
+        .btn-secondary {
+            background-color: transparent;
+            border-color: var(--border);
+            color: var(--text-secondary);
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-success { background-color: var(--success); color: white; }
+        .btn-success:hover:not(:disabled) { background-color: #059669; }
+
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-danger:hover:not(:disabled) { background-color: #dc2626; }
+
+        .btn-sm {
+            padding: 0.25rem 0.6rem;
+            font-size: 0.775rem;
+        }
+
+        /* Container & Tabs */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.15s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* Cards & Grid */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.35rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.55rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .form-control:focus {
+            border-color: var(--accent);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            text-transform: capitalize;
+        }
+
+        .status-submitted { background: var(--info-bg); color: var(--info); }
+        .status-in_progress { background: var(--warning-bg); color: var(--warning); }
+        .status-delivered { background: var(--purple-bg); color: var(--purple); }
+        .status-accepted { background: var(--success-bg); color: var(--success); }
+        .status-rejected { background: var(--danger-bg); color: var(--danger); }
+
+        .quality-good { background: var(--success-bg); color: var(--success); font-weight: 600; }
+        .quality-usable { background: var(--warning-bg); color: var(--warning); font-weight: 600; }
+        .quality-bad { background: var(--danger-bg); color: var(--danger); font-weight: 600; }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-secondary);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Banner / Alerts */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .alert-error { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger); }
+        .alert-success { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+
+        /* Quick Auth Presets */
+        .auth-presets {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Modals */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+        }
+
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.25rem;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 0.85rem 1.25rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Stat Grid */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="brand">
+            <div class="brand-icon">🤖</div>
+            <span>Dataset Request Desk</span>
+        </div>
+        <div class="nav-actions" id="nav-actions">
+            <!-- Rendered by JS -->
+        </div>
+    </header>
+
+    <div class="container" id="app">
+        <!-- Main dynamic view container -->
+    </div>
+
+    <!-- Assignment Modal -->
+    <div id="assignModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modalReqTitle" style="font-size: 1.1rem; font-weight: 600;">Assign Episodes</h3>
+                    <p id="modalReqSubtitle" style="font-size: 0.8rem; color: var(--text-secondary);"></p>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="closeAssignModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <!-- Filters -->
+                <div class="form-grid" style="margin-bottom: 1rem;">
+                    <div class="form-group">
+                        <label>Filter Task Name</label>
+                        <input type="text" id="filterEpisodeTask" class="form-control" placeholder="Search task..." oninput="loadModalEpisodes()">
+                    </div>
+                    <div class="form-group">
+                        <label>Filter Quality</label>
+                        <select id="filterEpisodeQuality" class="form-control" onchange="loadModalEpisodes()">
+                            <option value="">All Assignable (Good & Usable)</option>
+                            <option value="good">Good Only</option>
+                            <option value="usable">Usable Only</option>
+                            <option value="bad">Bad (Non-assignable)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Assignment Status</label>
+                        <select id="filterEpisodeStatus" class="form-control" onchange="loadModalEpisodes()">
+                            <option value="unassigned">Unassigned Only</option>
+                            <option value="all">All Episodes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Episode table -->
+                <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Episode ID</th>
+                                <th>Task Name</th>
+                                <th>Quality</th>
+                                <th>Duration</th>
+                                <th>Robot</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalEpisodeTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAssignModal()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentUser = null;
+        let activeTab = 'requests';
+        let currentModalReqId = null;
+        let currentModalReq = null;
+
+        // On Load
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth();
+        });
+
+        // Auth Helpers
+        function getToken() {
+            return localStorage.getItem('drd_token');
+        }
+
+        function setToken(token) {
+            if (token) localStorage.setItem('drd_token', token);
+            else localStorage.removeItem('drd_token');
+        }
+
+        async function fetchAPI(url, options = {}) {
+            const token = getToken();
+            const headers = {
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            };
+            if (token) {
+                headers['Authorization'] = `Token ${token}`;
+            }
+
+            const response = await fetch(url, { ...options, headers });
+            if (response.status === 401 && !url.includes('/login')) {
+                logout();
+                throw new Error('Session expired. Please log in again.');
+            }
+            return response;
+        }
+
+        async function checkAuth() {
+            const token = getToken();
+            if (!token) {
+                renderAuthView();
+                return;
+            }
+
+            try {
+                const res = await fetchAPI('/api/auth/me/');
+                if (res.ok) {
+                    currentUser = await res.json();
+                    renderApp();
+                } else {
+                    logout();
+                }
+            } catch (err) {
+                logout();
+            }
+        }
+
+        async function login(username, password) {
+            try {
+                const res = await fetchAPI('/api/auth/login/', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setToken(data.token);
+                    currentUser = data.user;
+                    renderApp();
+                } else {
+                    showAuthError(data.error || 'Invalid credentials');
+                }
+            } catch (err) {
+                showAuthError(err.message);
+            }
+        }
+
+        async function register(username, email, password, organisation) {
+            try {
+                const res = await fetchAPI('/api/auth/register/', {
+                    method: 'POST',
+                    body: JSON.stringify({ username, email, password, organisation })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setToken(data.token);
+                    currentUser = data.user;
+                    renderApp();
+                } else {
+                    const errMsg = Object.entries(data).map(([k, v]) => `${k}: ${v}`).join(', ');
+                    showAuthError(errMsg || 'Registration failed');
+                }
+            } catch (err) {
+                showAuthError(err.message);
+            }
+        }
+
+        function logout() {
+            setToken(null);
+            currentUser = null;
+            renderAuthView();
+        }
+
+        // Render Navbar
+        function renderNav() {
+            const nav = document.getElementById('nav-actions');
+            if (!currentUser) {
+                nav.innerHTML = `
+                    <a href="/api/docs/" target="_blank" class="btn btn-secondary btn-sm">API Docs</a>
+                    <a href="/api/health/" target="_blank" class="btn btn-secondary btn-sm">Health</a>
+                `;
+                return;
+            }
+
+            nav.innerHTML = `
+                <div class="user-pill">
+                    <span>${currentUser.username}</span>
+                    <span class="role-tag role-${currentUser.role}">${currentUser.role}</span>
+                </div>
+                <a href="/api/docs/" target="_blank" class="btn btn-secondary btn-sm">API Docs</a>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+            `;
+        }
+
+        // Render Auth View (Login / Register)
+        function renderAuthView(isRegister = false) {
+            renderNav();
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div style="max-width: 440px; margin: 3rem auto;">
+                    <div class="card">
+                        <h2 class="card-title">${isRegister ? 'Create Client Account' : 'Sign In'}</h2>
+                        <div id="authError"></div>
+                        
+                        <form id="authForm" onsubmit="handleAuthSubmit(event, ${isRegister})">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="authUsername" class="form-control" required autocomplete="username">
+                            </div>
+                            ${isRegister ? `
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="authEmail" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Organisation</label>
+                                <input type="text" id="authOrg" class="form-control" placeholder="e.g. Acme Robotics">
+                            </div>
+                            ` : ''}
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="authPassword" class="form-control" required autocomplete="current-password">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+                                ${isRegister ? 'Register & Sign In' : 'Sign In'}
+                            </button>
+                        </form>
+
+                        <div style="margin-top: 1rem; text-align: center; font-size: 0.85rem;">
+                            ${isRegister 
+                                ? `Already have an account? <a href="#" style="color: var(--accent);" onclick="renderAuthView(false)">Sign In</a>`
+                                : `New client? <a href="#" style="color: var(--accent);" onclick="renderAuthView(true)">Register here</a>`
+                            }
+                        </div>
+
+                        ${!isRegister ? `
+                        <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">Demo Quick-Logins (Seed Users):</p>
+                            <div class="auth-presets">
+                                <button class="btn btn-secondary btn-sm" onclick="quickLogin('alex', 'alex1234')">Client: Alex</button>
+                                <button class="btn btn-secondary btn-sm" onclick="quickLogin('sam', 'sam1234')">Operator: Sam</button>
+                                <button class="btn btn-secondary btn-sm" onclick="quickLogin('devon', 'devon1234')">Admin: Devon</button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAuthError(msg) {
+            const errDiv = document.getElementById('authError');
+            if (errDiv) {
+                errDiv.innerHTML = `<div class="alert alert-error">${msg}</div>`;
+            }
+        }
+
+        function quickLogin(u, p) {
+            login(u, p);
+        }
+
+        function handleAuthSubmit(e, isRegister) {
+            e.preventDefault();
+            const u = document.getElementById('authUsername').value.trim();
+            const p = document.getElementById('authPassword').value;
+            if (isRegister) {
+                const em = document.getElementById('authEmail').value.trim();
+                const org = document.getElementById('authOrg').value.trim();
+                register(u, em, p, org);
+            } else {
+                login(u, p);
+            }
+        }
+
+        // Render Main App
+        function renderApp() {
+            renderNav();
+            const app = document.getElementById('app');
+            const isOperatorOrAdmin = currentUser.role === 'operator' || currentUser.role === 'admin';
+
+            app.innerHTML = `
+                <div class="nav-tabs">
+                    <button class="tab-btn ${activeTab === 'requests' ? 'active' : ''}" onclick="switchTab('requests')">
+                        ${currentUser.role === 'client' ? 'My Requests' : 'All Requests'}
+                    </button>
+                    ${currentUser.role === 'client' ? `
+                    <button class="tab-btn ${activeTab === 'new-request' ? 'active' : ''}" onclick="switchTab('new-request')">
+                        + New Request
+                    </button>
+                    ` : ''}
+                    ${isOperatorOrAdmin ? `
+                    <button class="tab-btn ${activeTab === 'episodes' ? 'active' : ''}" onclick="switchTab('episodes')">
+                        Episode Catalog
+                    </button>
+                    <button class="tab-btn ${activeTab === 'import' ? 'active' : ''}" onclick="switchTab('import')">
+                        CSV Import
+                    </button>
+                    <button class="tab-btn ${activeTab === 'analytics' ? 'active' : ''}" onclick="switchTab('analytics')">
+                        Analytics
+                    </button>
+                    ` : ''}
+                </div>
+
+                <div id="tabContent">
+                    <!-- Tab body loaded dynamically -->
+                </div>
+            `;
+
+            loadActiveTabContent();
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+            renderApp();
+        }
+
+        function loadActiveTabContent() {
+            if (activeTab === 'requests') loadRequestsView();
+            else if (activeTab === 'new-request') loadNewRequestView();
+            else if (activeTab === 'episodes') loadEpisodesView();
+            else if (activeTab === 'import') loadImportView();
+            else if (activeTab === 'analytics') loadAnalyticsView();
+        }
+
+        // 1. REQUESTS VIEW
+        async function loadRequestsView() {
+            const container = document.getElementById('tabContent');
+            container.innerHTML = `<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading requests...</div>`;
+
+            try {
+                const res = await fetchAPI('/api/requests/');
+                const requests = await res.json();
+                
+                let html = `
+                    <div class="card">
+                        <div class="card-title">
+                            <span>${currentUser.role === 'client' ? 'My Dataset Requests' : 'Operator Workflow Desk'}</span>
+                            <span style="font-size: 0.85rem; color: var(--text-muted);">${requests.length} requests total</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Task Name</th>
+                                        <th>Client</th>
+                                        <th>Progress</th>
+                                        <th>Deadline</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+
+                if (requests.length === 0) {
+                    html += `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No dataset requests found.</td></tr>`;
+                } else {
+                    requests.forEach(req => {
+                        const progressPct = Math.min(100, Math.round((req.assigned_count / req.episodes_requested) * 100));
+                        html += `
+                            <tr>
+                                <td class="mono">#${req.id}</td>
+                                <td>
+                                    <div style="font-weight: 600;">${escapeHtml(req.task_name)}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHtml(req.notes || 'No notes')}</div>
+                                </td>
+                                <td>${escapeHtml(req.client_username)}</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div style="flex: 1; min-width: 60px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;">
+                                            <div style="width: ${progressPct}%; height: 100%; background: var(--accent);"></div>
+                                        </div>
+                                        <span class="mono" style="font-size: 0.75rem;">${req.assigned_count}/${req.episodes_requested}</span>
+                                    </div>
+                                </td>
+                                <td>${req.deadline || 'None'}</td>
+                                <td>
+                                    <span class="status-badge status-${req.status}">${req.status.replace('_', ' ')}</span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
+                                        ${renderRequestActions(req)}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += `</tbody></table></div></div>`;
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<div class="alert alert-error">Failed to load requests: ${err.message}</div>`;
+            }
+        }
+
+        function renderRequestActions(req) {
+            let actions = '';
+            const role = currentUser.role;
+
+            // Client actions (when delivered)
+            if (role === 'client' && req.status === 'delivered') {
+                actions += `
+                    <button class="btn btn-success btn-sm" onclick="transitionReq(${req.id}, 'accepted')">Accept</button>
+                    <button class="btn btn-danger btn-sm" onclick="transitionReq(${req.id}, 'rejected')">Reject</button>
+                `;
+            }
+
+            // Operator / Admin actions
+            if (role === 'operator' || role === 'admin') {
+                if (req.status === 'submitted') {
+                    actions += `<button class="btn btn-primary btn-sm" onclick="transitionReq(${req.id}, 'in_progress')">Start Work</button>`;
+                } else if (req.status === 'in_progress') {
+                    const canDeliver = req.assigned_count >= req.episodes_requested;
+                    actions += `
+                        <button class="btn btn-secondary btn-sm" onclick="openAssignModal(${req.id})">Assign Episodes</button>
+                        <button class="btn btn-success btn-sm" ${!canDeliver ? 'disabled title="Need all episodes assigned first"' : ''} onclick="transitionReq(${req.id}, 'delivered')">Deliver</button>
+                    `;
+                } else if (req.status === 'rejected') {
+                    actions += `<button class="btn btn-warning btn-sm" onclick="transitionReq(${req.id}, 'in_progress')">Rework</button>`;
+                }
+            }
+
+            return actions || '<span style="color: var(--text-muted); font-size: 0.75rem;">—</span>';
+        }
+
+        async function transitionReq(reqId, targetStatus) {
+            try {
+                const res = await fetchAPI(`/api/requests/${reqId}/transition/`, {
+                    method: 'POST',
+                    body: JSON.stringify({ status: targetStatus })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    loadRequestsView();
+                } else {
+                    alert(`Transition failed: ${data.error || JSON.stringify(data)}`);
+                }
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            }
+        }
+
+        // 2. NEW REQUEST VIEW (Client)
+        function loadNewRequestView() {
+            const container = document.getElementById('tabContent');
+            container.innerHTML = `
+                <div class="card" style="max-width: 600px; margin: 0 auto;">
+                    <h3 class="card-title">Submit New Dataset Request</h3>
+                    <div id="newReqMsg"></div>
+                    <form onsubmit="handleCreateRequest(event)">
+                        <div class="form-group">
+                            <label>Target Task Name</label>
+                            <input type="text" id="reqTaskName" class="form-control" placeholder="e.g. pick_and_place_cubes" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Episodes Needed</label>
+                            <input type="number" id="reqEpisodes" class="form-control" min="1" max="10000" value="10" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Delivery Deadline (Optional)</label>
+                            <input type="date" id="reqDeadline" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Specification Notes</label>
+                            <textarea id="reqNotes" class="form-control" placeholder="Describe quality expectations, lighting, camera angles, etc."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Dataset Request</button>
+                    </form>
+                </div>
+            `;
+        }
+
+        async function handleCreateRequest(e) {
+            e.preventDefault();
+            const task_name = document.getElementById('reqTaskName').value.trim();
+            const episodes_requested = parseInt(document.getElementById('reqEpisodes').value, 10);
+            const deadline = document.getElementById('reqDeadline').value || null;
+            const notes = document.getElementById('reqNotes').value.trim();
+
+            try {
+                const res = await fetchAPI('/api/requests/', {
+                    method: 'POST',
+                    body: JSON.stringify({ task_name, episodes_requested, deadline, notes })
+                });
+                if (res.ok) {
+                    activeTab = 'requests';
+                    renderApp();
+                } else {
+                    const err = await res.json();
+                    document.getElementById('newReqMsg').innerHTML = `<div class="alert alert-error">${JSON.stringify(err)}</div>`;
+                }
+            } catch (err) {
+                document.getElementById('newReqMsg').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        // 3. EPISODE CATALOG VIEW
+        async function loadEpisodesView() {
+            const container = document.getElementById('tabContent');
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-title">
+                        <span>Episode Catalog</span>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="text" id="catalogSearch" class="form-control" placeholder="Search task or robot..." style="width: 220px;" oninput="fetchEpisodeCatalog()">
+                            <select id="catalogQuality" class="form-control" style="width: 140px;" onchange="fetchEpisodeCatalog()">
+                                <option value="">All Qualities</option>
+                                <option value="good">Good</option>
+                                <option value="usable">Usable</option>
+                                <option value="bad">Bad</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Episode ID</th>
+                                    <th>Robot</th>
+                                    <th>Task</th>
+                                    <th>Recorded At</th>
+                                    <th>Duration</th>
+                                    <th>Quality</th>
+                                    <th>Assigned To</th>
+                                </tr>
+                            </thead>
+                            <tbody id="catalogTableBody">
+                                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            fetchEpisodeCatalog();
+        }
+
+        async function fetchEpisodeCatalog() {
+            const search = document.getElementById('catalogSearch')?.value.trim() || '';
+            const quality = document.getElementById('catalogQuality')?.value || '';
+            let url = `/api/episodes/?search=${encodeURIComponent(search)}`;
+            if (quality) url += `&quality=${quality}`;
+
+            try {
+                const res = await fetchAPI(url);
+                const episodes = await res.json();
+                const tbody = document.getElementById('catalogTableBody');
+                if (!tbody) return;
+
+                if (episodes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No episodes matched.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = episodes.map(ep => `
+                    <tr>
+                        <td class="mono">${escapeHtml(ep.episode_id)}</td>
+                        <td>${escapeHtml(ep.robot_id)}</td>
+                        <td style="font-weight: 500;">${escapeHtml(ep.task_name)}</td>
+                        <td style="font-size: 0.75rem; color: var(--text-muted);">${new Date(ep.recorded_at).toLocaleString()}</td>
+                        <td class="mono">${ep.duration_seconds}s</td>
+                        <td><span class="status-badge quality-${ep.quality}">${ep.quality}</span></td>
+                        <td>${ep.assigned_request ? `<span class="mono">Req #${ep.assigned_request}</span>` : '<span style="color: var(--text-muted);">Available</span>'}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // 4. CSV IMPORT VIEW
+        function loadImportView() {
+            const container = document.getElementById('tabContent');
+            container.innerHTML = `
+                <div class="card" style="max-width: 650px; margin: 0 auto;">
+                    <h3 class="card-title">Import Episodes from CSV</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                        Upload recording session exports. The import is fully idempotent: messy timestamps, float durations, case normalization, and duplicate records are handled safely.
+                    </p>
+                    <div id="importResult"></div>
+                    <form onsubmit="handleCsvImport(event)">
+                        <div class="form-group">
+                            <label>Select CSV File</label>
+                            <input type="file" id="csvFile" class="form-control" accept=".csv" required>
+                        </div>
+                        <button type="submit" id="importSubmitBtn" class="btn btn-primary" style="width: 100%;">
+                            Upload & Import
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        async function handleCsvImport(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('csvFile');
+            if (!fileInput.files.length) return;
+
+            const btn = document.getElementById('importSubmitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Importing...';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const token = getToken();
+                const res = await fetch('/api/episodes/import_csv/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Token ${token}`
+                    },
+                    body: formData
+                });
+                const result = await res.json();
+                btn.disabled = false;
+                btn.innerText = 'Upload & Import';
+
+                if (res.ok) {
+                    document.getElementById('importResult').innerHTML = `
+                        <div class="alert alert-success">
+                            <div>
+                                <strong>Import Complete!</strong><br>
+                                Created: ${result.created_count} | Updated: ${result.updated_count} | Skipped: ${result.skipped_count}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('importResult').innerHTML = `<div class="alert alert-error">${result.error || 'Import failed'}</div>`;
+                }
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerText = 'Upload & Import';
+                document.getElementById('importResult').innerHTML = `<div class="alert alert-error">${err.message}</div>`;
+            }
+        }
+
+        // 5. ANALYTICS VIEW
+        async function loadAnalyticsView() {
+            const container = document.getElementById('tabContent');
+            container.innerHTML = `
+                <div class="card">
+                    <div class="card-title">
+                        <span>Platform Performance & Analytics</span>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="date" id="anaStart" class="form-control" style="width: 140px;" onchange="fetchAnalyticsData()">
+                            <span style="color: var(--text-muted);">to</span>
+                            <input type="date" id="anaEnd" class="form-control" style="width: 140px;" onchange="fetchAnalyticsData()">
+                        </div>
+                    </div>
+                    <div id="analyticsBody" style="margin-top: 1rem;">
+                        <div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading database analytics...</div>
+                    </div>
+                </div>
+            `;
+            fetchAnalyticsData();
+        }
+
+        async function fetchAnalyticsData() {
+            const start = document.getElementById('anaStart')?.value || '';
+            const end = document.getElementById('anaEnd')?.value || '';
+            let url = '/api/requests/analytics/';
+            const params = [];
+            if (start) params.push(`start_date=${start}`);
+            if (end) params.push(`end_date=${end}`);
+            if (params.length) url += `?${params.join('&')}`;
+
+            try {
+                const res = await fetchAPI(url);
+                const data = await res.json();
+                const container = document.getElementById('analyticsBody');
+                if (!container) return;
+
+                const reqCounts = data.request_fulfilment.counts_by_status;
+                const medianHrs = data.request_fulfilment.median_delivery_time_hours;
+
+                container.innerHTML = `
+                    <div class="stat-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Submitted</div>
+                            <div class="stat-value" style="color: var(--info);">${reqCounts.submitted || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">In Progress</div>
+                            <div class="stat-value" style="color: var(--warning);">${reqCounts.in_progress || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Delivered</div>
+                            <div class="stat-value" style="color: var(--purple);">${reqCounts.delivered || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Accepted</div>
+                            <div class="stat-value" style="color: var(--success);">${reqCounts.accepted || 0}</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Median Delivery</div>
+                            <div class="stat-value">${medianHrs !== null ? medianHrs + 'h' : 'N/A'}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                        <div>
+                            <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem;">Top 5 Tasks (Good Quality Episodes)</h4>
+                            <div class="table-responsive">
+                                <table>
+                                    <thead><tr><th>Task Name</th><th>Good Episodes</th></tr></thead>
+                                    <tbody>
+                                        ${data.top_5_tasks_by_good_episodes.map(t => `
+                                            <tr><td>${escapeHtml(t.task_name)}</td><td class="mono" style="font-weight: 600; color: var(--success);">${t.good_episodes_count}</td></tr>
+                                        `).join('') || '<tr><td colspan="2" style="color: var(--text-muted);">No data</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem;">Episodes Recorded per Day / Robot</h4>
+                            <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+                                <table>
+                                    <thead><tr><th>Date</th><th>Robot ID</th><th>Count</th></tr></thead>
+                                    <tbody>
+                                        ${data.episodes_per_day_per_robot.map(r => `
+                                            <tr><td>${r.date}</td><td class="mono">${escapeHtml(r.robot_id)}</td><td class="mono">${r.episode_count}</td></tr>
+                                        `).join('') || '<tr><td colspan="3" style="color: var(--text-muted);">No data</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // 6. ASSIGNMENT MODAL LOGIC
+        async function openAssignModal(reqId) {
+            currentModalReqId = reqId;
+            try {
+                const res = await fetchAPI(`/api/requests/${reqId}/`);
+                currentModalReq = await res.json();
+                document.getElementById('modalReqTitle').innerText = `Assign Episodes to Request #${reqId}`;
+                document.getElementById('modalReqSubtitle').innerText = `Task: ${currentModalReq.task_name} | Assigned: ${currentModalReq.assigned_count}/${currentModalReq.episodes_requested} needed`;
+                document.getElementById('filterEpisodeTask').value = currentModalReq.task_name;
+                document.getElementById('assignModal').style.display = 'flex';
+                loadModalEpisodes();
+            } catch (err) {
+                alert(`Failed to load request: ${err.message}`);
+            }
+        }
+
+        function closeAssignModal() {
+            document.getElementById('assignModal').style.display = 'none';
+            currentModalReqId = null;
+            currentModalReq = null;
+            loadRequestsView();
+        }
+
+        async function loadModalEpisodes() {
+            const task = document.getElementById('filterEpisodeTask').value.trim();
+            const quality = document.getElementById('filterEpisodeQuality').value;
+            const statusFilter = document.getElementById('filterEpisodeStatus').value;
+
+            let url = `/api/episodes/?search=${encodeURIComponent(task)}`;
+            if (quality) url += `&quality=${quality}`;
+
+            try {
+                const res = await fetchAPI(url);
+                let episodes = await res.json();
+                const tbody = document.getElementById('modalEpisodeTableBody');
+
+                if (statusFilter === 'unassigned') {
+                    episodes = episodes.filter(e => !e.assigned_request || e.assigned_request === currentModalReqId);
+                }
+
+                if (episodes.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No matching episodes found.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = episodes.map(ep => {
+                    const isAssignedToThis = ep.assigned_request === currentModalReqId;
+                    const isAssignedToOther = ep.assigned_request && ep.assigned_request !== currentModalReqId;
+                    const isBad = ep.quality === 'bad';
+
+                    let actionBtn = '';
+                    if (isAssignedToThis) {
+                        actionBtn = `<button class="btn btn-danger btn-sm" onclick="unassignEp(${currentModalReqId}, ${ep.id})">Unassign</button>`;
+                    } else if (isAssignedToOther) {
+                        actionBtn = `<span style="color: var(--text-muted); font-size: 0.75rem;">Assigned (#${ep.assigned_request})</span>`;
+                    } else if (isBad) {
+                        actionBtn = `<span style="color: var(--danger); font-size: 0.75rem;">Bad Quality</span>`;
+                    } else {
+                        actionBtn = `<button class="btn btn-primary btn-sm" onclick="assignEp(${currentModalReqId}, ${ep.id})">Assign</button>`;
+                    }
+
+                    return `
+                        <tr>
+                            <td class="mono">${escapeHtml(ep.episode_id)}</td>
+                            <td>${escapeHtml(ep.task_name)}</td>
+                            <td><span class="status-badge quality-${ep.quality}">${ep.quality}</span></td>
+                            <td class="mono">${ep.duration_seconds}s</td>
+                            <td>${escapeHtml(ep.robot_id)}</td>
+                            <td>${actionBtn}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function assignEp(reqId, episodeId) {
+            try {
+                const res = await fetchAPI(`/api/requests/${reqId}/assign/`, {
+                    method: 'POST',
+                    body: JSON.stringify({ episode_id: episodeId })
+                });
+                if (res.ok) {
+                    const updatedReq = await (await fetchAPI(`/api/requests/${reqId}/`)).json();
+                    document.getElementById('modalReqSubtitle').innerText = `Task: ${updatedReq.task_name} | Assigned: ${updatedReq.assigned_count}/${updatedReq.episodes_requested} needed`;
+                    loadModalEpisodes();
+                } else {
+                    const data = await res.json();
+                    alert(`Assignment failed: ${data.error || JSON.stringify(data)}`);
+                }
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            }
+        }
+
+        async function unassignEp(reqId, episodeId) {
+            try {
+                const res = await fetchAPI(`/api/requests/${reqId}/unassign/`, {
+                    method: 'POST',
+                    body: JSON.stringify({ episode_id: episodeId })
+                });
+                if (res.ok) {
+                    const updatedReq = await (await fetchAPI(`/api/requests/${reqId}/`)).json();
+                    document.getElementById('modalReqSubtitle').innerText = `Task: ${updatedReq.task_name} | Assigned: ${updatedReq.assigned_count}/${updatedReq.episodes_requested} needed`;
+                    loadModalEpisodes();
+                } else {
+                    const data = await res.json();
+                    alert(`Unassign failed: ${data.error || JSON.stringify(data)}`);
+                }
+            } catch (err) {
+                alert(`Error: ${err.message}`);
+            }
+        }
+
+        // Utility
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
