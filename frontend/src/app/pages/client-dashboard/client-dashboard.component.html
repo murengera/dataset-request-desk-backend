@@ -1,0 +1,220 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Dataset Request Desk</h1>
+      <p class="dashboard-subtitle" *ngIf="currentUser">
+        Welcome, <strong>{{ currentUser.username }}</strong>
+        <span *ngIf="currentUser.organisation">({{ currentUser.organisation }})</span>
+      </p>
+    </div>
+    <div class="header-nav">
+      <button
+        class="btn"
+        [ngClass]="activeTab === 'list' ? 'btn-primary' : 'btn-secondary'"
+        (click)="activeTab = 'list'"
+      >
+        My Requests
+      </button>
+      <button
+        class="btn"
+        [ngClass]="activeTab === 'create' ? 'btn-primary' : 'btn-secondary'"
+        (click)="activeTab = 'create'"
+      >
+        + Create Request
+      </button>
+      <button class="btn btn-secondary" (click)="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Error / Success Alert -->
+  <div *ngIf="message" class="alert alert-success">
+    {{ message }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- VIEW 1: MY REQUESTS LIST -->
+  <div *ngIf="activeTab === 'list'">
+    <div class="card">
+      <div class="card-header-row">
+        <h2 class="section-title">My Dataset Requests</h2>
+        <button class="btn btn-secondary btn-sm" (click)="loadRequests()">Refresh</button>
+      </div>
+
+      <div *ngIf="loading" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        Loading requests...
+      </div>
+
+      <div *ngIf="!loading && requests.length === 0" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+        You have not submitted any dataset requests yet. Click "Create Request" above to get started.
+      </div>
+
+      <div *ngIf="!loading && requests.length > 0" style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Task Name</th>
+              <th>Episodes</th>
+              <th>Deadline</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let req of requests">
+              <td class="mono">#{{ req.id }}</td>
+              <td>
+                <div style="font-weight: 600;">{{ req.task_name }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);" *ngIf="req.notes">{{ req.notes }}</div>
+              </td>
+              <td>
+                <span class="mono">{{ req.assigned_count }} / {{ req.episodes_requested }}</span>
+              </td>
+              <td>{{ req.deadline || 'None' }}</td>
+              <td>
+                <span class="badge" [ngClass]="'badge-' + req.status">
+                  {{ req.status.replace('_', ' ') }}
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                  <!-- Accept / Reject when Delivered -->
+                  <ng-container *ngIf="req.status === 'delivered'">
+                    <button class="btn btn-success btn-sm" (click)="transitionStatus(req.id, 'accepted')">
+                      Accept
+                    </button>
+                    <button class="btn btn-danger btn-sm" (click)="transitionStatus(req.id, 'rejected')">
+                      Reject
+                    </button>
+                  </ng-container>
+
+                  <!-- View Details -->
+                  <button class="btn btn-secondary btn-sm" (click)="viewDetails(req)">
+                    Details
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 2: CREATE REQUEST FORM -->
+  <div *ngIf="activeTab === 'create'">
+    <div class="card create-card">
+      <h2 class="section-title" style="margin-bottom: 1rem;">Submit New Dataset Request</h2>
+      <form (ngSubmit)="submitCreateRequest()">
+        <div class="form-group">
+          <label>Task Name</label>
+          <input
+            type="text"
+            class="form-control"
+            name="task_name"
+            [(ngModel)]="newRequest.task_name"
+            placeholder="e.g. pick_and_place_cups"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Episodes Requested</label>
+          <input
+            type="number"
+            class="form-control"
+            name="episodes_requested"
+            [(ngModel)]="newRequest.episodes_requested"
+            min="1"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Deadline (Optional)</label>
+          <input
+            type="date"
+            class="form-control"
+            name="deadline"
+            [(ngModel)]="newRequest.deadline"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Notes (Optional)</label>
+          <textarea
+            class="form-control"
+            name="notes"
+            [(ngModel)]="newRequest.notes"
+            placeholder="Specify camera angles, robot type, or special requirements"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="submitting">
+            {{ submitting ? 'Submitting...' : 'Create Request' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="activeTab = 'list'">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REQUEST DETAILS MODAL -->
+  <div *ngIf="selectedRequest" class="modal-backdrop">
+    <div class="card modal-card">
+      <div class="modal-header">
+        <h3 class="section-title">Request #{{ selectedRequest.id }} Details</h3>
+        <button class="btn btn-secondary btn-sm" (click)="selectedRequest = null">✕</button>
+      </div>
+
+      <div class="details-grid">
+        <div><strong>Task:</strong> {{ selectedRequest.task_name }}</div>
+        <div><strong>Status:</strong> <span class="badge" [ngClass]="'badge-' + selectedRequest.status">{{ selectedRequest.status }}</span></div>
+        <div><strong>Episodes Needed:</strong> {{ selectedRequest.episodes_requested }}</div>
+        <div><strong>Assigned Count:</strong> {{ selectedRequest.assigned_count }}</div>
+        <div><strong>Deadline:</strong> {{ selectedRequest.deadline || 'None' }}</div>
+        <div><strong>Notes:</strong> {{ selectedRequest.notes || 'None' }}</div>
+      </div>
+
+      <div *ngIf="selectedRequest.status === 'delivered'" class="review-banner">
+        <span style="font-size: 0.85rem; color: var(--purple);">This request has been delivered for your review:</span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-success btn-sm" (click)="transitionStatus(selectedRequest.id, 'accepted')">Accept</button>
+          <button class="btn btn-danger btn-sm" (click)="transitionStatus(selectedRequest.id, 'rejected')">Reject</button>
+        </div>
+      </div>
+
+      <h4 style="font-size: 0.9rem; font-weight: 600; margin: 1rem 0 0.5rem 0;">Assigned Episodes ({{ selectedRequest.assignments?.length || 0 }})</h4>
+      <div *ngIf="!selectedRequest.assignments || selectedRequest.assignments.length === 0" style="color: var(--text-muted); font-size: 0.85rem;">
+        No episodes assigned yet.
+      </div>
+      <table *ngIf="selectedRequest.assignments && selectedRequest.assignments.length > 0">
+        <thead>
+          <tr>
+            <th>Episode ID</th>
+            <th>Task</th>
+            <th>Quality</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of selectedRequest.assignments">
+            <td class="mono">{{ a.episode_id }}</td>
+            <td>{{ a.episode_task }}</td>
+            <td><span class="badge" [ngClass]="'badge-' + a.episode_quality">{{ a.episode_quality }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top: 1.5rem; text-align: right;">
+        <button class="btn btn-secondary" (click)="selectedRequest = null">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -15,10 +15,10 @@ import {
   providedIn: 'root',
 })
 export class ApiService {
-  private readonly baseUrl = 'http://localhost:8000/api';
+  private readonly baseUrl = 'http://127.0.0.1:8000/api';
   private readonly tokenKey = 'drd_auth_token';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   // --- Auth & Token Management ---
   getToken(): string | null {

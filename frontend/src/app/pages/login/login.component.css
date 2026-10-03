@@ -1,0 +1,55 @@
+.login-container {
+  max-width: 420px;
+  margin: 4rem auto;
+  padding: 1rem;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.login-header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.toggle-mode {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.toggle-mode a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.presets-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.presets-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.presets-grid {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

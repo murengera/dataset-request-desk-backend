@@ -1,0 +1,88 @@
+<div class="login-container">
+  <div class="card">
+    <div class="login-header">
+      <h2>Dataset Request Desk</h2>
+      <p>{{ isRegistering ? 'Register Client Account' : 'Sign in to your account' }}</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Username</label>
+        <input
+          type="text"
+          name="username"
+          class="form-control"
+          [(ngModel)]="username"
+          placeholder="e.g. alex"
+          required
+        />
+      </div>
+
+      <div *ngIf="isRegistering" class="form-group">
+        <label>Email</label>
+        <input
+          type="email"
+          name="email"
+          class="form-control"
+          [(ngModel)]="email"
+          placeholder="alex@acme.com"
+          required
+        />
+      </div>
+
+      <div *ngIf="isRegistering" class="form-group">
+        <label>Organisation</label>
+        <input
+          type="text"
+          name="organisation"
+          class="form-control"
+          [(ngModel)]="organisation"
+          placeholder="Acme Robotics"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input
+          type="password"
+          name="password"
+          class="form-control"
+          [(ngModel)]="password"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary submit-btn"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Processing...' : (isRegistering ? 'Register & Sign In' : 'Login') }}
+      </button>
+    </form>
+
+    <div class="toggle-mode">
+      <a
+        href="javascript:void(0)"
+        (click)="toggleMode()"
+      >
+        {{ isRegistering ? 'Already have an account? Log in' : 'New client? Register here' }}
+      </a>
+    </div>
+
+    <!-- Quick Demo logins -->
+    <div *ngIf="!isRegistering" class="presets-section">
+      <p class="presets-title">Seed User Presets:</p>
+      <div class="presets-grid">
+        <button class="btn btn-secondary btn-sm" (click)="quickFill('alex', 'alex1234')">Client: Alex</button>
+        <button class="btn btn-secondary btn-sm" (click)="quickFill('sam', 'sam1234')">Operator: Sam</button>
+        <button class="btn btn-secondary btn-sm" (click)="quickFill('devon', 'devon1234')">Admin: Devon</button>
+      </div>
+    </div>
+  </div>
+</div>
