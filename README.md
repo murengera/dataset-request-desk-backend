@@ -27,11 +27,11 @@ The database automatically seeds user accounts from `seed/users.json` on startup
 
 | Email / Username | Role | Password | Name & Description |
 |---|---|---|---|
-| `admin@example.com` | **admin** | `admin123` | Ada Admin (Full system control & user management) |
-| `ops1@example.com` | **operator** | `ops123` | Olu Operator (Dataset fulfillment, episode assignments, CSV import) |
-| `ops2@example.com` | **operator** | `ops123` | Odile Operator (Dataset fulfillment, episode assignments, CSV import) |
-| `client-a@example.com` | **client** | `client123` | Acme Robotics (Create requests, review & accept/reject deliveries) |
-| `client-b@example.com` | **client** | `client123` | Beta Labs (Create requests, review & accept/reject deliveries) |
+| `admin@example.com` | **admin** | `admin123` | Ada Admin (Full access, user management, operator capabilities) |
+| `ops1@example.com` | **operator** | `ops123` | Olu Operator (Workflow transitions, episode assignments, CSV imports) |
+| `ops2@example.com` | **operator** | `ops123` | Odile Operator (Operations team member) |
+| `client-a@example.com` | **client** | `client123` | Acme Robotics (Can submit requests & accept/reject deliveries) |
+| `client-b@example.com` | **client** | `client123` | Beta Labs (Can submit requests & accept/reject deliveries) |
 
 > **Note:** Clients can also self-register at `POST /api/auth/register/` or via the web UI.
 

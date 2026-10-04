@@ -11,13 +11,13 @@
 
     <form (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label>{{ isRegistering ? 'Username' : 'Username or Email' }}</label>
+        <label>Username</label>
         <input
           type="text"
           name="username"
           class="form-control"
           [(ngModel)]="username"
-          [placeholder]="isRegistering ? 'e.g. acme_admin' : 'admin@example.com or client-a@example.com'"
+          placeholder="e.g. alex"
           required
         />
       </div>
@@ -77,10 +77,9 @@
 
     <!-- Quick Demo logins -->
     <div *ngIf="!isRegistering" class="presets-section">
-      <p class="presets-title">Seed User Quick-Logins:</p>
+      <p class="presets-title">Seed User Presets:</p>
       <div class="presets-grid">
         <button type="button" class="btn btn-secondary btn-sm" (click)="quickFill('client-a@example.com', 'client123')">Client: Acme</button>
-        <button type="button" class="btn btn-secondary btn-sm" (click)="quickFill('client-b@example.com', 'client123')">Client: Beta</button>
         <button type="button" class="btn btn-secondary btn-sm" (click)="quickFill('ops1@example.com', 'ops123')">Operator: Olu</button>
         <button type="button" class="btn btn-secondary btn-sm" (click)="quickFill('admin@example.com', 'admin123')">Admin: Ada</button>
       </div>
