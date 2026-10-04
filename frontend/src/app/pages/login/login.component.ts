@@ -58,7 +58,7 @@ export class LoginComponent {
           },
           error: (err) => {
             this.loading = false;
-            this.errorMessage = err.error?.error || 'Registration failed. Please check your inputs.';
+            this.errorMessage = this.api.formatError(err);
           },
         });
     } else {
@@ -75,7 +75,7 @@ export class LoginComponent {
           },
           error: (err) => {
             this.loading = false;
-            this.errorMessage = err.error?.error || 'Invalid username or password.';
+            this.errorMessage = this.api.formatError(err);
           },
         });
     }

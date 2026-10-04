@@ -42,6 +42,42 @@ export class ApiService {
     return headers;
   }
 
+  // --- Error Formatter Helper ---
+  formatError(err: any): string {
+    if (!err) return 'An unexpected error occurred.';
+    const errorBody = err.error || err;
+
+    if (typeof errorBody === 'string') {
+      return errorBody;
+    }
+
+    if (errorBody.error && typeof errorBody.error === 'string') {
+      return errorBody.error;
+    }
+    if (errorBody.detail && typeof errorBody.detail === 'string') {
+      return errorBody.detail;
+    }
+
+    if (typeof errorBody === 'object' && errorBody !== null) {
+      const messages: string[] = [];
+      for (const [field, fieldErrors] of Object.entries(errorBody)) {
+        const fieldName = field === 'non_field_errors' ? '' : `${field.replace('_', ' ')}: `;
+        if (Array.isArray(fieldErrors)) {
+          messages.push(`${fieldName}${fieldErrors.join(' ')}`);
+        } else if (typeof fieldErrors === 'string') {
+          messages.push(`${fieldName}${fieldErrors}`);
+        } else if (typeof fieldErrors === 'object') {
+          messages.push(`${fieldName}${JSON.stringify(fieldErrors)}`);
+        }
+      }
+      if (messages.length > 0) {
+        return messages.join(' | ');
+      }
+    }
+
+    return err.message || 'Operation failed. Please check your inputs.';
+  }
+
   login(credentials: { username_or_email?: string; username?: string; password: string }): Observable<AuthResponse> {
     const payload = {
       username_or_email: credentials.username_or_email || credentials.username,

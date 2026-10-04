@@ -91,7 +91,7 @@ export class ClientDashboardComponent implements OnInit {
         },
         error: (err) => {
           this.submitting = false;
-          this.errorMessage = err.error?.error || 'Failed to create request.';
+          this.errorMessage = this.api.formatError(err);
         },
       });
   }
@@ -119,7 +119,7 @@ export class ClientDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.reviewing = false;
-        this.errorMessage = err.error?.error || `Failed to transition request #${request.id}`;
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -132,7 +132,7 @@ export class ClientDashboardComponent implements OnInit {
         this.loadRequests();
       },
       error: (err) => {
-        this.errorMessage = err.error?.error || `Failed to transition request #${id}`;
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -174,7 +174,7 @@ export class ClientDashboardComponent implements OnInit {
         },
         error: (err) => {
           this.updating = false;
-          this.errorMessage = err.error?.error || 'Failed to update request.';
+          this.errorMessage = this.api.formatError(err);
         },
       });
   }

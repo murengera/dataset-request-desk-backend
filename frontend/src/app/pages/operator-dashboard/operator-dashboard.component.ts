@@ -133,7 +133,7 @@ export class OperatorDashboardComponent implements OnInit {
         this.loadRequests();
       },
       error: (err) => {
-        this.errorMessage = err.error?.error || 'Transition failed.';
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -158,7 +158,7 @@ export class OperatorDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.delivering = false;
-        this.errorMessage = err.error?.error || 'Delivery transition failed.';
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -187,7 +187,7 @@ export class OperatorDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.reworking = false;
-        this.errorMessage = err.error?.error || 'Rework transition failed.';
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -227,7 +227,7 @@ export class OperatorDashboardComponent implements OnInit {
         this.loadModalEpisodes();
       },
       error: (err) => {
-        alert(err.error?.error || 'Assignment failed.');
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -242,7 +242,7 @@ export class OperatorDashboardComponent implements OnInit {
         this.loadModalEpisodes();
       },
       error: (err) => {
-        alert(err.error?.error || 'Unassign failed.');
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -263,7 +263,7 @@ export class OperatorDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.importing = false;
-        this.errorMessage = err.error?.error || 'Import failed.';
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -292,7 +292,7 @@ export class OperatorDashboardComponent implements OnInit {
         this.message = `Updated ${user.username}'s role to ${newRole}.`;
       },
       error: (err) => {
-        this.errorMessage = err.error?.error || 'Failed to update user role.';
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -305,7 +305,7 @@ export class OperatorDashboardComponent implements OnInit {
         this.message = `${user.username} is now ${user.is_active ? 'active' : 'deactivated'}.`;
       },
       error: (err) => {
-        this.errorMessage = err.error?.error || 'Failed to update active status.';
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
@@ -329,7 +329,7 @@ export class OperatorDashboardComponent implements OnInit {
       },
       error: (err) => {
         this.submittingUser = false;
-        this.errorMessage = err.error?.error || JSON.stringify(err.error) || 'Failed to create user.';
+        this.errorMessage = this.api.formatError(err);
       },
     });
   }
