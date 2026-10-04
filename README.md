@@ -13,9 +13,10 @@ docker compose up --build
 ```
 
 Once running:
-- **Web Application UI:** [http://localhost:8000/](http://localhost:8000/)
-- **Interactive Swagger Docs (OpenAPI 3):** [http://localhost:8000/api/docs/](http://localhost:8000/api/docs/)
-- **Redoc Documentation:** [http://localhost:8000/api/redoc/](http://localhost:8000/api/redoc/)
+- **Angular Frontend Application:** [http://localhost:4200/](http://localhost:4200/)
+- **Django REST Backend API:** [http://localhost:8000/](http://localhost:8000/)
+- **Interactive Swagger Docs (OpenAPI 3):** [http://localhost:8000/api/schema/swagger-ui/](http://localhost:8000/api/schema/swagger-ui/)
+- **Redoc Documentation:** [http://localhost:8000/api/schema/redoc/](http://localhost:8000/api/schema/redoc/)
 - **Health Check Endpoint:** [http://localhost:8000/api/health/](http://localhost:8000/api/health/)
 
 ---
