@@ -73,7 +73,29 @@ export class ApiService {
     deadline?: string | null;
     notes?: string;
   }): Observable<DatasetRequest> {
-    return this.http.post<DatasetRequest>(`${this.baseUrl}/requests/`, data, { headers: this.getHeaders() });
+    const payload = {
+      ...data,
+      deadline: data.deadline ? data.deadline : null,
+    };
+    return this.http.post<DatasetRequest>(`${this.baseUrl}/requests/`, payload, { headers: this.getHeaders() });
+  }
+
+  updateRequest(
+    id: number,
+    data: {
+      task_name?: string;
+      episodes_requested?: number;
+      deadline?: string | null;
+      notes?: string;
+    }
+  ): Observable<DatasetRequest> {
+    const payload = {
+      ...data,
+      deadline: data.deadline ? data.deadline : null,
+    };
+    return this.http.patch<DatasetRequest>(`${this.baseUrl}/requests/${id}/`, payload, {
+      headers: this.getHeaders(),
+    });
   }
 
   transitionRequest(id: number, status: string): Observable<DatasetRequest> {

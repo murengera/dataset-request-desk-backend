@@ -2,26 +2,32 @@
   <!-- Header -->
   <div class="operator-header">
     <div>
-      <h1 class="operator-title">Dataset Request Desk — Operations</h1>
+      <h1 class="operator-title">Dataset Request Desk Operations</h1>
       <p class="operator-subtitle" *ngIf="currentUser">
         Logged in as <strong>{{ currentUser.username }}</strong>
-        <span class="badge" [ngClass]="'badge-' + currentUser.role" style="margin-left: 0.5rem;">{{ currentUser.role }}</span>
+        <span class="badge" [ngClass]="'badge-' + currentUser.role" style="margin-left: 0.5rem;">{{ currentUser.role
+          }}</span>
       </p>
     </div>
     <div class="header-nav">
-      <button class="btn" [ngClass]="activeTab === 'requests' ? 'btn-primary' : 'btn-secondary'" (click)="activeTab = 'requests'">
+      <button class="btn" [ngClass]="activeTab === 'requests' ? 'btn-primary' : 'btn-secondary'"
+        (click)="activeTab = 'requests'">
         Requests Desk
       </button>
-      <button class="btn" [ngClass]="activeTab === 'episodes' ? 'btn-primary' : 'btn-secondary'" (click)="activeTab = 'episodes'">
+      <button class="btn" [ngClass]="activeTab === 'episodes' ? 'btn-primary' : 'btn-secondary'"
+        (click)="activeTab = 'episodes'">
         Episode Catalog
       </button>
-      <button class="btn" [ngClass]="activeTab === 'import' ? 'btn-primary' : 'btn-secondary'" (click)="activeTab = 'import'">
+      <button class="btn" [ngClass]="activeTab === 'import' ? 'btn-primary' : 'btn-secondary'"
+        (click)="activeTab = 'import'">
         CSV Import
       </button>
-      <button class="btn" [ngClass]="activeTab === 'analytics' ? 'btn-primary' : 'btn-secondary'" (click)="activeTab = 'analytics'; loadAnalytics()">
+      <button class="btn" [ngClass]="activeTab === 'analytics' ? 'btn-primary' : 'btn-secondary'"
+        (click)="activeTab = 'analytics'; loadAnalytics()">
         Analytics
       </button>
-      <button *ngIf="currentUser?.role === 'admin'" class="btn" [ngClass]="activeTab === 'users' ? 'btn-primary' : 'btn-secondary'" (click)="activeTab = 'users'; loadUsers()">
+      <button *ngIf="currentUser?.role === 'admin'" class="btn"
+        [ngClass]="activeTab === 'users' ? 'btn-primary' : 'btn-secondary'" (click)="activeTab = 'users'; loadUsers()">
         User Management
       </button>
       <button class="btn btn-secondary" (click)="logout()">Logout</button>
@@ -44,7 +50,8 @@
         Loading requests...
       </div>
 
-      <div *ngIf="!loadingRequests && requests.length === 0" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+      <div *ngIf="!loadingRequests && requests.length === 0"
+        style="text-align: center; padding: 2rem; color: var(--text-muted);">
         No requests found.
       </div>
 
@@ -81,11 +88,8 @@
               <td>
                 <div style="display: flex; gap: 0.35rem; flex-wrap: wrap;">
                   <!-- Start Work -->
-                  <button
-                    *ngIf="req.status === 'submitted'"
-                    class="btn btn-primary btn-sm"
-                    (click)="transitionReq(req.id, 'in_progress')"
-                  >
+                  <button *ngIf="req.status === 'submitted'" class="btn btn-primary btn-sm"
+                    (click)="transitionReq(req.id, 'in_progress')">
                     Start Work
                   </button>
 
@@ -94,22 +98,16 @@
                     <button class="btn btn-secondary btn-sm" (click)="openAssignModal(req)">
                       Assign Episodes
                     </button>
-                    <button
-                      class="btn btn-success btn-sm"
-                      [disabled]="req.assigned_count < req.episodes_requested"
+                    <button class="btn btn-success btn-sm" [disabled]="req.assigned_count < req.episodes_requested"
                       [title]="req.assigned_count < req.episodes_requested ? 'Must assign all requested episodes first' : ''"
-                      (click)="transitionReq(req.id, 'delivered')"
-                    >
+                      (click)="transitionReq(req.id, 'delivered')">
                       Deliver
                     </button>
                   </ng-container>
 
                   <!-- Rework if rejected -->
-                  <button
-                    *ngIf="req.status === 'rejected'"
-                    class="btn btn-warning btn-sm"
-                    (click)="transitionReq(req.id, 'in_progress')"
-                  >
+                  <button *ngIf="req.status === 'rejected'" class="btn btn-warning btn-sm"
+                    (click)="transitionReq(req.id, 'in_progress')">
                     Rework
                   </button>
                 </div>
@@ -127,14 +125,8 @@
       <div class="card-header-row" style="gap: 1rem;">
         <h2 class="section-title">Episode Catalog</h2>
         <div class="filter-inputs">
-          <input
-            type="text"
-            class="form-control"
-            style="width: 200px;"
-            placeholder="Search task name..."
-            [(ngModel)]="episodeSearch"
-            (input)="loadEpisodes()"
-          />
+          <input type="text" class="form-control" style="width: 200px;" placeholder="Search task name..."
+            [(ngModel)]="episodeSearch" (input)="loadEpisodes()" />
           <select class="form-control" style="width: 140px;" [(ngModel)]="episodeQuality" (change)="loadEpisodes()">
             <option value="">All Qualities</option>
             <option value="good">Good</option>
@@ -148,7 +140,8 @@
         Loading episodes...
       </div>
 
-      <div *ngIf="!loadingEpisodes && episodes.length === 0" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+      <div *ngIf="!loadingEpisodes && episodes.length === 0"
+        style="text-align: center; padding: 2rem; color: var(--text-muted);">
         No episodes match the selected filter.
       </div>
 
@@ -191,7 +184,8 @@
     <div class="card import-card">
       <h2 class="section-title" style="margin-bottom: 0.5rem;">Import Episodes from CSV</h2>
       <p class="import-desc">
-        Upload recording logs. The backend import is idempotent and normalizes timestamps, floats, casing, and duplicates.
+        Upload recording logs. The backend import is idempotent and normalizes timestamps, floats, casing, and
+        duplicates.
       </p>
 
       <form (ngSubmit)="onUploadCsv()">
@@ -206,7 +200,8 @@
       </form>
 
       <div *ngIf="importReport" class="import-report">
-        <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Import Result</h4>
+        <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--success); margin-bottom: 0.5rem;">Import Result
+        </h4>
         <div style="font-size: 0.85rem;">
           <div><strong>Created:</strong> {{ importReport.created_count }}</div>
           <div><strong>Updated:</strong> {{ importReport.updated_count }}</div>
@@ -258,7 +253,8 @@
           <div class="card analytics-stat-card">
             <div class="stat-label">MEDIAN DELIVERY</div>
             <div class="stat-val">
-              {{ analytics.request_fulfilment.median_delivery_time_hours !== null ? analytics.request_fulfilment.median_delivery_time_hours + 'h' : 'N/A' }}
+              {{ analytics.request_fulfilment.median_delivery_time_hours !== null ?
+              analytics.request_fulfilment.median_delivery_time_hours + 'h' : 'N/A' }}
             </div>
           </div>
         </div>
@@ -266,10 +262,14 @@
         <!-- Top 5 Tasks & Robot Recordings -->
         <div class="analytics-details-grid">
           <div>
-            <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">Top 5 Tasks (Good Quality Episodes)</h4>
+            <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem;">Top 5 Tasks (Good Quality Episodes)
+            </h4>
             <table>
               <thead>
-                <tr><th>Task Name</th><th>Count</th></tr>
+                <tr>
+                  <th>Task Name</th>
+                  <th>Count</th>
+                </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let t of analytics.top_5_tasks_by_good_episodes">
@@ -285,7 +285,11 @@
             <div class="table-scroll-container">
               <table>
                 <thead>
-                  <tr><th>Date</th><th>Robot</th><th>Count</th></tr>
+                  <tr>
+                    <th>Date</th>
+                    <th>Robot</th>
+                    <th>Count</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let r of analytics.episodes_per_day_per_robot">
@@ -308,7 +312,8 @@
       <div class="card-header-row">
         <div>
           <h2 class="section-title">User & Client Management</h2>
-          <p style="font-size: 0.8rem; color: var(--text-muted);">Manage user accounts, roles (client/operator/admin), and active status.</p>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Manage user accounts, roles (client/operator/admin),
+            and active status.</p>
         </div>
         <div style="display: flex; gap: 0.5rem;">
           <button class="btn btn-primary btn-sm" (click)="showCreateUserModal = true">
@@ -322,7 +327,8 @@
         Loading user accounts...
       </div>
 
-      <div *ngIf="!loadingUsers && users.length === 0" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+      <div *ngIf="!loadingUsers && users.length === 0"
+        style="text-align: center; padding: 2rem; color: var(--text-muted);">
         No users found.
       </div>
 
@@ -346,13 +352,8 @@
               <td>{{ u.email }}</td>
               <td>{{ u.organisation || '—' }}</td>
               <td>
-                <select
-                  class="form-control"
-                  style="width: 120px; padding: 0.25rem 0.5rem; font-size: 0.8rem;"
-                  [ngModel]="u.role"
-                  (ngModelChange)="changeUserRole(u, $event)"
-                  [disabled]="u.id === currentUser?.id"
-                >
+                <select class="form-control" style="width: 120px; padding: 0.25rem 0.5rem; font-size: 0.8rem;"
+                  [ngModel]="u.role" (ngModelChange)="changeUserRole(u, $event)" [disabled]="u.id === currentUser?.id">
                   <option value="client">Client</option>
                   <option value="operator">Operator</option>
                   <option value="admin">Admin</option>
@@ -364,12 +365,8 @@
                 </span>
               </td>
               <td>
-                <button
-                  *ngIf="u.id !== currentUser?.id"
-                  class="btn btn-sm"
-                  [ngClass]="u.is_active ? 'btn-danger' : 'btn-success'"
-                  (click)="toggleUserActive(u)"
-                >
+                <button *ngIf="u.id !== currentUser?.id" class="btn btn-sm"
+                  [ngClass]="u.is_active ? 'btn-danger' : 'btn-success'" (click)="toggleUserActive(u)">
                   {{ u.is_active ? 'Deactivate' : 'Activate' }}
                 </button>
                 <span *ngIf="u.id === currentUser?.id" style="font-size: 0.75rem; color: var(--text-muted);">
@@ -394,17 +391,20 @@
       <form (ngSubmit)="submitCreateUser()">
         <div class="form-group">
           <label>Username</label>
-          <input type="text" class="form-control" name="newUsername" [(ngModel)]="newUser.username" placeholder="e.g. jordan" required />
+          <input type="text" class="form-control" name="newUsername" [(ngModel)]="newUser.username"
+            placeholder="e.g. jordan" required />
         </div>
 
         <div class="form-group">
           <label>Email</label>
-          <input type="email" class="form-control" name="newEmail" [(ngModel)]="newUser.email" placeholder="jordan@boston.ai" required />
+          <input type="email" class="form-control" name="newEmail" [(ngModel)]="newUser.email"
+            placeholder="jordan@boston.ai" required />
         </div>
 
         <div class="form-group">
           <label>Password</label>
-          <input type="password" class="form-control" name="newPassword" [(ngModel)]="newUser.password" placeholder="••••••••" required />
+          <input type="password" class="form-control" name="newPassword" [(ngModel)]="newUser.password"
+            placeholder="••••••••" required />
         </div>
 
         <div class="form-group">
@@ -418,7 +418,8 @@
 
         <div class="form-group">
           <label>Organisation (Optional)</label>
-          <input type="text" class="form-control" name="newOrg" [(ngModel)]="newUser.organisation" placeholder="e.g. Boston Dynamics" />
+          <input type="text" class="form-control" name="newOrg" [(ngModel)]="newUser.organisation"
+            placeholder="e.g. Boston Dynamics" />
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
@@ -436,7 +437,8 @@
         <div>
           <h3 class="section-title">Assign Episodes to Request #{{ assigningRequest.id }}</h3>
           <p style="font-size: 0.8rem; color: var(--text-muted);">
-            Task: <strong>{{ assigningRequest.task_name }}</strong> | Assigned: <strong>{{ assigningRequest.assigned_count }} / {{ assigningRequest.episodes_requested }}</strong> needed
+            Task: <strong>{{ assigningRequest.task_name }}</strong> | Assigned: <strong>{{
+              assigningRequest.assigned_count }} / {{ assigningRequest.episodes_requested }}</strong> needed
           </p>
         </div>
         <button class="btn btn-secondary btn-sm" (click)="closeAssignModal()">✕</button>
@@ -444,15 +446,10 @@
 
       <!-- Filter episodes in modal -->
       <div class="modal-filter-row">
-        <input
-          type="text"
-          class="form-control"
-          style="flex: 1;"
-          placeholder="Search task..."
-          [(ngModel)]="modalTaskSearch"
-          (input)="loadModalEpisodes()"
-        />
-        <select class="form-control" style="width: 160px;" [(ngModel)]="modalQualityFilter" (change)="loadModalEpisodes()">
+        <input type="text" class="form-control" style="flex: 1;" placeholder="Search task..."
+          [(ngModel)]="modalTaskSearch" (input)="loadModalEpisodes()" />
+        <select class="form-control" style="width: 160px;" [(ngModel)]="modalQualityFilter"
+          (change)="loadModalEpisodes()">
           <option value="">Good & Usable</option>
           <option value="good">Good Only</option>
           <option value="usable">Usable Only</option>
@@ -477,21 +474,16 @@
               <td><span class="badge" [ngClass]="'badge-' + ep.quality">{{ ep.quality }}</span></td>
               <td class="mono">{{ ep.duration_seconds }}s</td>
               <td>
-                <button
-                  *ngIf="ep.assigned_request === assigningRequest.id"
-                  class="btn btn-danger btn-sm"
-                  (click)="unassign(ep.episode_id)"
-                >
+                <button *ngIf="ep.assigned_request === assigningRequest.id" class="btn btn-danger btn-sm"
+                  (click)="unassign(ep.episode_id)">
                   Unassign
                 </button>
-                <button
-                  *ngIf="!ep.assigned_request && ep.quality !== 'bad'"
-                  class="btn btn-primary btn-sm"
-                  (click)="assign(ep.episode_id)"
-                >
+                <button *ngIf="!ep.assigned_request && ep.quality !== 'bad'" class="btn btn-primary btn-sm"
+                  (click)="assign(ep.episode_id)">
                   Assign
                 </button>
-                <span *ngIf="ep.assigned_request && ep.assigned_request !== assigningRequest.id" style="font-size: 0.75rem; color: var(--text-muted);">
+                <span *ngIf="ep.assigned_request && ep.assigned_request !== assigningRequest.id"
+                  style="font-size: 0.75rem; color: var(--text-muted);">
                   Assigned (#{{ ep.assigned_request }})
                 </span>
               </td>

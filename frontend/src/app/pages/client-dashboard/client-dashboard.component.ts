@@ -16,9 +16,11 @@ export class ClientDashboardComponent implements OnInit {
   currentUser: User | null = null;
   requests: DatasetRequest[] = [];
   selectedRequest: DatasetRequest | null = null;
+  editingRequest: { id: number; task_name: string; episodes_requested: number; deadline: string; notes: string } | null = null;
   activeTab: 'list' | 'create' = 'list';
   loading = false;
   submitting = false;
+  updating = false;
   message = '';
   errorMessage = '';
 
@@ -103,6 +105,56 @@ export class ClientDashboardComponent implements OnInit {
         this.errorMessage = err.error?.error || `Failed to transition request #${id}`;
       },
     });
+  }
+
+  openEditModal(req: DatasetRequest): void {
+    this.editingRequest = {
+      id: req.id,
+      task_name: req.task_name,
+      episodes_requested: req.episodes_requested,
+      deadline: req.deadline || '',
+      notes: req.notes || '',
+    };
+  }
+
+  submitEditRequest(): void {
+    if (!this.editingRequest) return;
+    this.errorMessage = '';
+    this.message = '';
+
+    if (!this.editingRequest.task_name || this.editingRequest.episodes_requested < 1) {
+      this.errorMessage = 'Please provide a valid task name and episode count.';
+      return;
+    }
+
+    this.updating = true;
+    this.api
+      .updateRequest(this.editingRequest.id, {
+        task_name: this.editingRequest.task_name.trim(),
+        episodes_requested: this.editingRequest.episodes_requested,
+        deadline: this.editingRequest.deadline || null,
+        notes: this.editingRequest.notes.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.updating = false;
+          this.message = `Request #${this.editingRequest?.id} updated successfully!`;
+          this.editingRequest = null;
+          this.loadRequests();
+        },
+        error: (err) => {
+          this.updating = false;
+          this.errorMessage = err.error?.error || 'Failed to update request.';
+        },
+      });
+  }
+
+  isOverdue(deadline: string | null, status: string): boolean {
+    if (!deadline || status === 'accepted') return false;
+    const deadlineDate = new Date(deadline);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return deadlineDate < today;
   }
 
   viewDetails(req: DatasetRequest): void {

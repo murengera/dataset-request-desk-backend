@@ -73,14 +73,19 @@
               <td>
                 <span class="mono">{{ req.assigned_count }} / {{ req.episodes_requested }}</span>
               </td>
-              <td>{{ req.deadline || 'None' }}</td>
+              <td>
+                <div>{{ req.deadline || 'None' }}</div>
+                <span *ngIf="isOverdue(req.deadline, req.status)" class="badge badge-rejected" style="font-size: 0.65rem; margin-top: 0.2rem;">
+                  Overdue
+                </span>
+              </td>
               <td>
                 <span class="badge" [ngClass]="'badge-' + req.status">
                   {{ req.status.replace('_', ' ') }}
                 </span>
               </td>
               <td>
-                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
                   <!-- Accept / Reject when Delivered -->
                   <ng-container *ngIf="req.status === 'delivered'">
                     <button class="btn btn-success btn-sm" (click)="transitionStatus(req.id, 'accepted')">
@@ -90,6 +95,11 @@
                       Reject
                     </button>
                   </ng-container>
+
+                  <!-- Edit Request (available for un-accepted requests) -->
+                  <button *ngIf="req.status !== 'accepted'" class="btn btn-secondary btn-sm" (click)="openEditModal(req)">
+                    Edit
+                  </button>
 
                   <!-- View Details -->
                   <button class="btn btn-secondary btn-sm" (click)="viewDetails(req)">
@@ -215,6 +225,68 @@
       <div style="margin-top: 1.5rem; text-align: right;">
         <button class="btn btn-secondary" (click)="selectedRequest = null">Close</button>
       </div>
+    </div>
+  </div>
+
+  <!-- EDIT REQUEST MODAL -->
+  <div *ngIf="editingRequest" class="modal-backdrop">
+    <div class="card modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="section-title">Edit Request #{{ editingRequest.id }}</h3>
+        <button class="btn btn-secondary btn-sm" (click)="editingRequest = null">✕</button>
+      </div>
+
+      <form (ngSubmit)="submitEditRequest()">
+        <div class="form-group">
+          <label>Task Name</label>
+          <input
+            type="text"
+            class="form-control"
+            name="editTaskName"
+            [(ngModel)]="editingRequest.task_name"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Episodes Requested</label>
+          <input
+            type="number"
+            class="form-control"
+            name="editEpisodes"
+            [(ngModel)]="editingRequest.episodes_requested"
+            min="1"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Deadline (Optional)</label>
+          <input
+            type="date"
+            class="form-control"
+            name="editDeadline"
+            [(ngModel)]="editingRequest.deadline"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Notes (Optional)</label>
+          <textarea
+            class="form-control"
+            name="editNotes"
+            [(ngModel)]="editingRequest.notes"
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" (click)="editingRequest = null">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="updating">
+            {{ updating ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
