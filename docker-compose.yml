@@ -51,5 +51,15 @@ services:
         - action: rebuild
           path: ./backend/requirements.txt
 
+  frontend:
+    build: ./frontend
+    container_name: candidate-pack-ui
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - web
+
 volumes:
   postgres_data:
+
