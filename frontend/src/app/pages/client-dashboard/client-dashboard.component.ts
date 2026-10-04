@@ -17,10 +17,12 @@ export class ClientDashboardComponent implements OnInit {
   requests: DatasetRequest[] = [];
   selectedRequest: DatasetRequest | null = null;
   editingRequest: { id: number; task_name: string; episodes_requested: number; deadline: string; notes: string } | null = null;
+  reviewModal: { request: DatasetRequest; status: 'accepted' | 'rejected'; notes: string } | null = null;
   activeTab: 'list' | 'create' = 'list';
   loading = false;
   submitting = false;
   updating = false;
+  reviewing = false;
   message = '';
   errorMessage = '';
 
@@ -94,8 +96,36 @@ export class ClientDashboardComponent implements OnInit {
       });
   }
 
-  transitionStatus(id: number, status: 'accepted' | 'rejected'): void {
-    this.api.transitionRequest(id, status).subscribe({
+  openReviewModal(req: DatasetRequest, status: 'accepted' | 'rejected'): void {
+    this.reviewModal = {
+      request: req,
+      status,
+      notes: '',
+    };
+  }
+
+  submitReview(): void {
+    if (!this.reviewModal) return;
+    const { request, status, notes } = this.reviewModal;
+
+    this.reviewing = true;
+    this.api.transitionRequest(request.id, status, notes).subscribe({
+      next: () => {
+        this.reviewing = false;
+        this.message = `Request #${request.id} has been ${status === 'accepted' ? 'accepted' : 'rejected and returned for rework'}!`;
+        this.reviewModal = null;
+        this.selectedRequest = null;
+        this.loadRequests();
+      },
+      error: (err) => {
+        this.reviewing = false;
+        this.errorMessage = err.error?.error || `Failed to transition request #${request.id}`;
+      },
+    });
+  }
+
+  transitionStatus(id: number, status: 'accepted' | 'rejected', notes?: string): void {
+    this.api.transitionRequest(id, status, notes).subscribe({
       next: () => {
         this.message = `Request #${id} marked as ${status}!`;
         this.selectedRequest = null;

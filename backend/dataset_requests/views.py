@@ -73,6 +73,7 @@ class RequestViewSet(viewsets.ModelViewSet):
         """
         req_obj = self.get_object()
         new_status = request.data.get("status")
+        notes = request.data.get("notes")
 
         if not new_status:
             return Response({"error": "Missing 'status' in request body."}, status=status.HTTP_400_BAD_REQUEST)
@@ -82,6 +83,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                 request=req_obj,
                 new_status=new_status,
                 user=request.user,
+                notes=notes,
             )
             return Response(RequestSerializer(updated_req).data, status=status.HTTP_200_OK)
         except WorkflowError as exc:

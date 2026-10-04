@@ -55,6 +55,10 @@ export class OperatorDashboardComponent implements OnInit {
 
   // Modal State
   assigningRequest: DatasetRequest | null = null;
+  deliverModal: { request: DatasetRequest; notes: string } | null = null;
+  reworkModal: { request: DatasetRequest; notes: string } | null = null;
+  delivering = false;
+  reworking = false;
   selectedFile: File | null = null;
   importReport: any = null;
 
@@ -122,14 +126,68 @@ export class OperatorDashboardComponent implements OnInit {
     });
   }
 
-  transitionReq(id: number, status: string): void {
-    this.api.transitionRequest(id, status).subscribe({
+  transitionReq(id: number, status: string, notes?: string): void {
+    this.api.transitionRequest(id, status, notes).subscribe({
       next: () => {
         this.message = `Request #${id} moved to ${status}`;
         this.loadRequests();
       },
       error: (err) => {
         this.errorMessage = err.error?.error || 'Transition failed.';
+      },
+    });
+  }
+
+  openDeliverModal(req: DatasetRequest): void {
+    this.deliverModal = {
+      request: req,
+      notes: '',
+    };
+  }
+
+  submitDeliver(): void {
+    if (!this.deliverModal) return;
+    const { request, notes } = this.deliverModal;
+    this.delivering = true;
+    this.api.transitionRequest(request.id, 'delivered', notes).subscribe({
+      next: () => {
+        this.delivering = false;
+        this.message = `Request #${request.id} successfully delivered to client!`;
+        this.deliverModal = null;
+        this.loadRequests();
+      },
+      error: (err) => {
+        this.delivering = false;
+        this.errorMessage = err.error?.error || 'Delivery transition failed.';
+      },
+    });
+  }
+
+  openReworkModal(req: DatasetRequest): void {
+    this.reworkModal = {
+      request: req,
+      notes: '',
+    };
+  }
+
+  submitRework(openAssignAfter = false): void {
+    if (!this.reworkModal) return;
+    const req = this.reworkModal.request;
+    const notes = this.reworkModal.notes;
+    this.reworking = true;
+    this.api.transitionRequest(req.id, 'in_progress', notes).subscribe({
+      next: () => {
+        this.reworking = false;
+        this.message = `Request #${req.id} moved back to In Progress for rework.`;
+        this.reworkModal = null;
+        this.loadRequests();
+        if (openAssignAfter) {
+          this.openAssignModal(req);
+        }
+      },
+      error: (err) => {
+        this.reworking = false;
+        this.errorMessage = err.error?.error || 'Rework transition failed.';
       },
     });
   }

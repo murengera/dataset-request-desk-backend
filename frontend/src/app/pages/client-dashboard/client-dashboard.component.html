@@ -88,10 +88,10 @@
                 <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
                   <!-- Accept / Reject when Delivered -->
                   <ng-container *ngIf="req.status === 'delivered'">
-                    <button class="btn btn-success btn-sm" (click)="transitionStatus(req.id, 'accepted')">
+                    <button class="btn btn-success btn-sm" (click)="openReviewModal(req, 'accepted')">
                       Accept
                     </button>
-                    <button class="btn btn-danger btn-sm" (click)="transitionStatus(req.id, 'rejected')">
+                    <button class="btn btn-danger btn-sm" (click)="openReviewModal(req, 'rejected')">
                       Reject
                     </button>
                   </ng-container>
@@ -196,8 +196,8 @@
       <div *ngIf="selectedRequest.status === 'delivered'" class="review-banner">
         <span style="font-size: 0.85rem; color: var(--purple);">This request has been delivered for your review:</span>
         <div style="display: flex; gap: 0.5rem;">
-          <button class="btn btn-success btn-sm" (click)="transitionStatus(selectedRequest.id, 'accepted')">Accept</button>
-          <button class="btn btn-danger btn-sm" (click)="transitionStatus(selectedRequest.id, 'rejected')">Reject</button>
+          <button class="btn btn-success btn-sm" (click)="openReviewModal(selectedRequest, 'accepted')">Accept</button>
+          <button class="btn btn-danger btn-sm" (click)="openReviewModal(selectedRequest, 'rejected')">Reject</button>
         </div>
       </div>
 
@@ -284,6 +284,50 @@
           <button type="button" class="btn btn-secondary" (click)="editingRequest = null">Cancel</button>
           <button type="submit" class="btn btn-primary" [disabled]="updating">
             {{ updating ? 'Saving...' : 'Save Changes' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REVIEW DELIVERY MODAL (ACCEPT / REJECT WITH NOTES) -->
+  <div *ngIf="reviewModal" class="modal-backdrop">
+    <div class="card modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="section-title">
+          {{ reviewModal.status === 'accepted' ? 'Accept Delivery' : 'Reject Delivery & Request Rework' }} #{{ reviewModal.request.id }}
+        </h3>
+        <button class="btn btn-secondary btn-sm" (click)="reviewModal = null">✕</button>
+      </div>
+
+      <form (ngSubmit)="submitReview()">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          {{ reviewModal.status === 'accepted'
+              ? 'Confirm acceptance of the assigned episodes. You can include any optional feedback notes below.'
+              : 'Please provide clear feedback or reasons for rejection so operations staff can rework and replace episodes accordingly.' }}
+        </p>
+
+        <div class="form-group">
+          <label>{{ reviewModal.status === 'accepted' ? 'Feedback Notes (Optional)' : 'Rejection Reason / Rework Notes (Recommended)' }}</label>
+          <textarea
+            class="form-control"
+            name="reviewNotes"
+            [(ngModel)]="reviewModal.notes"
+            [placeholder]="reviewModal.status === 'accepted' ? 'e.g. Excellent dataset quality, all episodes verified.' : 'e.g. Episode EP-0012 has poor lighting and robot grip slipped.'"
+            rows="4"
+            [required]="reviewModal.status === 'rejected'"
+          ></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" (click)="reviewModal = null">Cancel</button>
+          <button
+            type="submit"
+            class="btn"
+            [ngClass]="reviewModal.status === 'accepted' ? 'btn-success' : 'btn-danger'"
+            [disabled]="reviewing"
+          >
+            {{ reviewing ? 'Submitting...' : (reviewModal.status === 'accepted' ? 'Confirm Acceptance' : 'Reject & Return for Rework') }}
           </button>
         </div>
       </form>

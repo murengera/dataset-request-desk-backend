@@ -73,7 +73,10 @@
               <td class="mono">#{{ req.id }}</td>
               <td>
                 <div style="font-weight: 600;">{{ req.task_name }}</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);" *ngIf="req.notes">{{ req.notes }}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);" *ngIf="req.notes && req.status !== 'rejected'">{{ req.notes }}</div>
+                <div *ngIf="req.status === 'rejected'" style="margin-top: 0.35rem; padding: 0.35rem 0.5rem; background: rgba(239, 68, 68, 0.15); border-left: 3px solid var(--danger); border-radius: 4px; font-size: 0.75rem; color: #fca5a5;">
+                  <strong>Client Feedback:</strong> {{ req.notes || 'Rework requested.' }}
+                </div>
               </td>
               <td>{{ req.client_username }}</td>
               <td>
@@ -99,16 +102,16 @@
                       Assign Episodes
                     </button>
                     <button class="btn btn-success btn-sm" [disabled]="req.assigned_count < req.episodes_requested"
-                      [title]="req.assigned_count < req.episodes_requested ? 'Must assign all requested episodes first' : ''"
-                      (click)="transitionReq(req.id, 'delivered')">
+                      [title]="req.assigned_count < req.episodes_requested ? 'Must assign all requested episodes first (' + req.assigned_count + '/' + req.episodes_requested + ')' : 'Deliver dataset to client for review'"
+                      (click)="openDeliverModal(req)">
                       Deliver
                     </button>
                   </ng-container>
 
                   <!-- Rework if rejected -->
                   <button *ngIf="req.status === 'rejected'" class="btn btn-warning btn-sm"
-                    (click)="transitionReq(req.id, 'in_progress')">
-                    Rework
+                    (click)="openReworkModal(req)">
+                    Rework Request
                   </button>
                 </div>
               </td>
@@ -494,6 +497,86 @@
 
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeAssignModal()">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVER REQUEST MODAL -->
+  <div *ngIf="deliverModal" class="modal-backdrop">
+    <div class="card modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="section-title">Deliver Dataset to Client (Request #{{ deliverModal.request.id }})</h3>
+        <button class="btn btn-secondary btn-sm" (click)="deliverModal = null">✕</button>
+      </div>
+
+      <form (ngSubmit)="submitDeliver()">
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 6px; padding: 0.85rem; margin-bottom: 1rem;">
+          <div style="font-weight: 600; font-size: 0.9rem; color: var(--success); margin-bottom: 0.25rem;">
+            Ready for Delivery
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Task: <strong>{{ deliverModal.request.task_name }}</strong> &bull;
+            Assigned: <strong>{{ deliverModal.request.assigned_count }} / {{ deliverModal.request.episodes_requested }}</strong> episodes.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Delivery Notes / Message to Client (Optional)</label>
+          <textarea
+            class="form-control"
+            name="deliverNotes"
+            [(ngModel)]="deliverModal.notes"
+            placeholder="e.g. All 10 episodes verified with Good/Usable quality and full trajectory coverage."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" (click)="deliverModal = null">Cancel</button>
+          <button type="submit" class="btn btn-success" [disabled]="delivering">
+            {{ delivering ? 'Delivering...' : 'Confirm & Deliver to Client' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REWORK REQUEST MODAL -->
+  <div *ngIf="reworkModal" class="modal-backdrop">
+    <div class="card modal-card" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3 class="section-title">Rework Rejected Request #{{ reworkModal.request.id }}</h3>
+        <button class="btn btn-secondary btn-sm" (click)="reworkModal = null">✕</button>
+      </div>
+
+      <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; padding: 0.85rem; margin-bottom: 1rem;">
+        <div style="font-weight: 600; font-size: 0.85rem; color: var(--danger); margin-bottom: 0.25rem;">
+          Customer Feedback / Reason for Rejection:
+        </div>
+        <div style="font-size: 0.85rem; color: #fca5a5; font-style: italic;">
+          "{{ reworkModal.request.notes || 'No specific note provided by client.' }}"
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Operator Rework Notes (Optional)</label>
+        <textarea
+          class="form-control"
+          name="reworkNotes"
+          [(ngModel)]="reworkModal.notes"
+          placeholder="e.g. Reviewed feedback; replacing rejected episodes with newly captured recordings."
+          rows="3"
+        ></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary" (click)="reworkModal = null">Cancel</button>
+        <button type="button" class="btn btn-warning" [disabled]="reworking" (click)="submitRework(false)">
+          {{ reworking ? 'Updating...' : 'Move to In Progress' }}
+        </button>
+        <button type="button" class="btn btn-primary" [disabled]="reworking" (click)="submitRework(true)">
+          {{ reworking ? 'Updating...' : 'Move to In Progress & Assign Episodes' }}
+        </button>
       </div>
     </div>
   </div>

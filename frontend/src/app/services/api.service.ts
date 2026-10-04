@@ -98,10 +98,14 @@ export class ApiService {
     });
   }
 
-  transitionRequest(id: number, status: string): Observable<DatasetRequest> {
+  transitionRequest(id: number, status: string, notes?: string): Observable<DatasetRequest> {
+    const payload: { status: string; notes?: string } = { status };
+    if (notes && notes.trim()) {
+      payload.notes = notes.trim();
+    }
     return this.http.post<DatasetRequest>(
       `${this.baseUrl}/requests/${id}/transition/`,
-      { status },
+      payload,
       { headers: this.getHeaders() }
     );
   }

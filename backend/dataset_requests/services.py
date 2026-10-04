@@ -43,7 +43,7 @@ def create_request(client_user, task_name, episodes_requested, deadline, notes="
     return request
 
 
-def transition_request_status(request, new_status, user):
+def transition_request_status(request, new_status, user, notes=None):
     """
     Transitions a request to a new status while enforcing:
     1. Valid state transition paths.
@@ -86,7 +86,12 @@ def transition_request_status(request, new_status, user):
     # 4. Apply status change and record audit history atomically
     with transaction.atomic():
         request.status = new_status
-        request.save(update_fields=["status", "updated_at"])
+        update_fields = ["status", "updated_at"]
+        if notes and notes.strip():
+            note_entry = f"[{user.username} ({new_status})]: {notes.strip()}"
+            request.notes = f"{request.notes}\n{note_entry}".strip() if request.notes else note_entry
+            update_fields.append("notes")
+        request.save(update_fields=update_fields)
 
         RequestStatusHistory.objects.create(
             request=request,
