@@ -92,10 +92,63 @@ During initial setup of the API test suite, tests involving DRF views failed wit
 | **Read/Write Scaling** | Heavy analytics dashboard queries compete with operational writes. | Introduce a PostgreSQL Read Replica for analytics and dashboard reporting (`DATABASE_ROUTERS`). |
 | **Caching** | Analytics date-range queries recomputed on every page reload. | Cache analytics query results in Redis with a 5-minute TTL (`django-redis`). |
 
----
-
 ## 6. AI Tooling Disclosure
 
 - **Tools Used:** Antigravity AI assistant.
 - **What it was used for:** Scaffolding boilerplate configurations (Docker multi-stage build, GitHub Actions workflow template, OpenAPI Swagger schema integration) and initial test case generation.
 - **Review & Verification:** All domain logic (state transition rules, assignment validation, CSV normalization, role scoping, database queries) was verified and tested directly against project specifications.
+
+---
+
+## 7. End-to-End API Testing (Postman Test Suite)
+
+To complement the automated Django test suite (26 unit/integration tests), an interactive **Postman Collection (`candidate-pack`)** was used for manual and automated API verification across all user roles (`client`, `operator`, `admin`).
+
+```
+candidate-pack (Postman API Collection)
+ ├── Authentication & User Identity
+ │    ├── POST  /api/auth/login/                             -> login
+ │    ├── POST  /api/auth/register/                          -> register
+ │    └── GET   /api/auth/me/                                -> Verify Logged-In
+ ├── Client Workflow
+ │    ├── POST  /api/requests/                               -> Client Creates a Dataset
+ │    └── GET   /api/requests/                               -> Client Views Their Own Requests
+ ├── Operator Workflow & Domain Invariants
+ │    ├── POST  /api/auth/login/                             -> login as operator
+ │    ├── GET   /api/episodes/                               -> Search & Filter Available Episodes
+ │    ├── GET   /api/requests/                               -> View All Requests Across All Clients
+ │    ├── POST  /api/requests/{id}/transition/               -> Move Request to in_progress
+ │    ├── POST  /api/requests/{id}/transition/               -> Test Business Rule: Try Delivering BEFORE Assigning (Must Fail)
+ │    ├── POST  /api/requests/{id}/assign_episode/           -> Assign Episodes to the Request
+ │    └── GET   /api/analytics/                              -> View the Analytics Dashboard
+ ├── Review & Rework Cycle
+ │    ├── POST  /api/requests/{id}/transition/               -> reject a delivered request (with feedback notes)
+ │    └── POST  /api/requests/{id}/transition/               -> restart work on the rejected request (rework flow)
+ ├── Data Ingestion & Admin Operations
+ │    ├── POST  /api/episodes/import_csv/                    -> Test CSV File Upload
+ │    ├── POST  /api/auth/login/                             -> Login as Admin
+ │    ├── GET   /api/users/                                  -> List All Users as Admin
+ │    ├── POST  /api/users/                                  -> Create a New Operator User
+ │    └── PATCH /api/users/{id}/                             -> Change User Role or Deactivate User
+```
+
+### Verified Scenarios & Assertions Matrix
+
+| # | Request Name | Endpoint & Method | Role Tested | Verified Behavior & Assertions |
+|---|---|---|---|---|
+| **1** | `login` | `POST /api/auth/login/` | Client / Operator | Returns `200 OK` with auth token (`Token <key>`) and serialized user object. |
+| **2** | `register` | `POST /api/auth/register/` | Anonymous | Enforces `client` role assignment on registration; returns `201 Created` with token. |
+| **3** | `Verify Logged-In` | `GET /api/auth/me/` | Authenticated User | Returns `200 OK` confirming user role, email, and organisation. |
+| **4** | `Client Creates a Dataset` | `POST /api/requests/` | Client | Creates request with status `submitted`; automatically normalizes empty string deadlines to `null`. |
+| **5** | `Client Views Their Own Requests` | `GET /api/requests/` | Client | Verifies object-level authorization: client can strictly only view requests belonging to their account. |
+| **6** | `Search & Filter Available Episodes` | `GET /api/episodes/` | Operator | Filters by `task_name` and `quality` (`good`, `usable`, `bad`); returns unassigned/assigned flags. |
+| **7** | `View All Requests Across All Clients` | `GET /api/requests/` | Operator / Admin | Returns complete request desk across all clients with full `status_history` audit trail. |
+| **8** | `Move Request to in_progress` | `POST /api/requests/{id}/transition/` | Operator | Transitions state from `submitted` to `in_progress`; appends entry to `status_history`. |
+| **9** | `Try Delivering BEFORE Assigning` | `POST /api/requests/{id}/transition/` | Operator | **Domain invariant verification:** Attempting to transition to `delivered` when `assigned_count < requested` returns `400 Bad Request` (`"Cannot deliver request: assigned episodes (0) do not match requested count (10)"`). |
+| **10** | `Assign Episodes to the Request` | `POST /api/requests/{id}/assign_episode/` | Operator | Assigns episode; enforces `OneToOne` invariant preventing assigning an already assigned episode. |
+| **11** | `View the Analytics Dashboard` | `GET /api/analytics/` | Operator / Admin | Computes status counts, median delivery time (hours), top 5 tasks with good episodes, and daily robot recordings. |
+| **12** | `reject a delivered request` | `POST /api/requests/{id}/transition/` | Client | Allows client to reject delivery with feedback notes (`[client (rejected)]: Reason...`), moving state to `rejected`. |
+| **13** | `restart work on the rejected request` | `POST /api/requests/{id}/transition/` | Operator | Transitions state from `rejected` back to `in_progress` with operator rework notes. |
+| **14** | `Test CSV File Upload` | `POST /api/episodes/import_csv/` | Operator | Multipart CSV upload; validates row normalization, idempotency, and skipping of malformed rows. |
+| **15** | `List All Users as Admin` | `GET /api/users/` | Admin | Returns all user accounts; non-admins receive `403 Forbidden`. |
+| **16** | `Change User Role or Deactivate User` | `PATCH /api/users/{id}/` | Admin | Allows updating user role (`client`/`operator`/`admin`) and toggling `is_active` status. |
