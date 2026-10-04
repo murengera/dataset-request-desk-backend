@@ -1,0 +1,24 @@
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+venv/
+.venv/
+env/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# System / IDE
+.DS_Store
+.vscode/
+.idea/
+*.log
