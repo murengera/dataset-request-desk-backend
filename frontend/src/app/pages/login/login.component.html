@@ -79,9 +79,9 @@
     <div *ngIf="!isRegistering" class="presets-section">
       <p class="presets-title">Seed User Presets:</p>
       <div class="presets-grid">
-        <button class="btn btn-secondary btn-sm" (click)="quickFill('alex', 'alex1234')">Client: Alex</button>
-        <button class="btn btn-secondary btn-sm" (click)="quickFill('sam', 'sam1234')">Operator: Sam</button>
-        <button class="btn btn-secondary btn-sm" (click)="quickFill('devon', 'devon1234')">Admin: Devon</button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="quickFill('client-a@example.com', 'client123')">Client: Acme</button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="quickFill('ops1@example.com', 'ops123')">Operator: Olu</button>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="quickFill('admin@example.com', 'admin123')">Admin: Ada</button>
       </div>
     </div>
   </div>
