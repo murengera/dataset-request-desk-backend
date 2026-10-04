@@ -144,6 +144,19 @@ export class ApiService {
     });
   }
 
+  // --- User Management (Admin) ---
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.baseUrl}/users/`, { headers: this.getHeaders() });
+  }
+
+  createUser(userData: Partial<User>): Observable<User> {
+    return this.http.post<User>(`${this.baseUrl}/users/`, userData, { headers: this.getHeaders() });
+  }
+
+  updateUser(id: number, userData: Partial<User>): Observable<User> {
+    return this.http.patch<User>(`${this.baseUrl}/users/${id}/`, userData, { headers: this.getHeaders() });
+  }
+
   getHealth(): Observable<{ status: string; database: string }> {
     return this.http.get<{ status: string; database: string }>(`${this.baseUrl}/health/`);
   }

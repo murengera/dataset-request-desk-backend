@@ -5,6 +5,10 @@ export interface User {
   role: 'client' | 'operator' | 'admin';
   organisation?: string;
   name?: string;
+  first_name?: string;
+  last_name?: string;
+  is_active?: boolean;
+  password?: string;
 }
 
 export interface AuthResponse {

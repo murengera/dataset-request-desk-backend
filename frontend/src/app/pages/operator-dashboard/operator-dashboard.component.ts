@@ -19,11 +19,14 @@ export class OperatorDashboardComponent implements OnInit {
   modalEpisodes: Episode[] = [];
   analytics: AnalyticsData | null = null;
 
-  activeTab: 'requests' | 'episodes' | 'import' | 'analytics' = 'requests';
+  activeTab: 'requests' | 'episodes' | 'import' | 'analytics' | 'users' = 'requests';
   loadingRequests = false;
   loadingEpisodes = false;
   loadingAnalytics = false;
+  loadingUsers = false;
   importing = false;
+  submittingUser = false;
+  showCreateUserModal = false;
 
   message = '';
   errorMessage = '';
@@ -33,6 +36,22 @@ export class OperatorDashboardComponent implements OnInit {
   episodeQuality = '';
   modalTaskSearch = '';
   modalQualityFilter = '';
+
+  // User management state (Admin)
+  users: User[] = [];
+  newUser: {
+    username: string;
+    email: string;
+    password?: string;
+    role: 'client' | 'operator' | 'admin';
+    organisation?: string;
+  } = {
+    username: '',
+    email: '',
+    password: '',
+    role: 'client',
+    organisation: '',
+  };
 
   // Modal State
   assigningRequest: DatasetRequest | null = null;
@@ -187,6 +206,72 @@ export class OperatorDashboardComponent implements OnInit {
       error: (err) => {
         this.importing = false;
         this.errorMessage = err.error?.error || 'Import failed.';
+      },
+    });
+  }
+
+  // --- Admin User Management Methods ---
+  loadUsers(): void {
+    if (this.currentUser?.role !== 'admin') return;
+    this.loadingUsers = true;
+    this.api.getUsers().subscribe({
+      next: (data) => {
+        this.users = data;
+        this.loadingUsers = false;
+      },
+      error: () => {
+        this.loadingUsers = false;
+        this.errorMessage = 'Failed to load user accounts.';
+      },
+    });
+  }
+
+  changeUserRole(user: User, newRole: string): void {
+    if (newRole !== 'client' && newRole !== 'operator' && newRole !== 'admin') return;
+    this.api.updateUser(user.id, { role: newRole as 'client' | 'operator' | 'admin' }).subscribe({
+      next: (updated) => {
+        user.role = updated.role;
+        this.message = `Updated ${user.username}'s role to ${newRole}.`;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.error || 'Failed to update user role.';
+      },
+    });
+  }
+
+  toggleUserActive(user: User): void {
+    const newStatus = !user.is_active;
+    this.api.updateUser(user.id, { is_active: newStatus }).subscribe({
+      next: (updated) => {
+        user.is_active = updated.is_active;
+        this.message = `${user.username} is now ${user.is_active ? 'active' : 'deactivated'}.`;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.error || 'Failed to update active status.';
+      },
+    });
+  }
+
+  submitCreateUser(): void {
+    this.errorMessage = '';
+    this.message = '';
+    if (!this.newUser.username || !this.newUser.email || !this.newUser.password) {
+      this.errorMessage = 'Please provide username, email, and password.';
+      return;
+    }
+
+    this.submittingUser = true;
+    this.api.createUser(this.newUser).subscribe({
+      next: () => {
+        this.submittingUser = false;
+        this.showCreateUserModal = false;
+        this.message = `User '${this.newUser.username}' created successfully!`;
+        this.newUser = { username: '', email: '', password: '', role: 'client', organisation: '' };
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.submittingUser = false;
+        this.errorMessage = err.error?.error || JSON.stringify(err.error) || 'Failed to create user.';
       },
     });
   }
