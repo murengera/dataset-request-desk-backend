@@ -8,19 +8,14 @@ on:
     branches:
       - main
 
-# Enforce least-privilege permissions: CI only needs to read repository contents
 permissions:
   contents: read
 
 jobs:
-  # ==========================================
-  # JOB 1: Backend CI/CD
-  # ==========================================
   backend-ci:
-    name: Backend CI (Test, Check & Build)
+    name: Backend CI
     runs-on: ubuntu-latest
 
-    # Ephemeral PostgreSQL service container for integration tests
     services:
       postgres:
         image: postgres:15-alpine
@@ -42,54 +37,40 @@ jobs:
       DB_PASSWORD: postgres
 
     steps:
-      # 1. Check out repository code
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2. Set up Python runtime with automatic pip caching
       - name: Set up Python 3.9
         uses: actions/setup-python@v5
         with:
           python-version: "3.9"
           cache: "pip"
 
-      # 3. Install backend dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      # 4. Django system checks (validates configuration, models, urls)
-      - name: Run Django system checks
+      - name: Django checks
         working-directory: backend
-        run: |
-          python manage.py check
+        run: python manage.py check
 
-      # 5. Apply database migrations to test PostgreSQL schema creation
-      - name: Apply database migrations
+      - name: Run migrations
         working-directory: backend
-        run: |
-          python manage.py migrate --noinput
+        run: python manage.py migrate --noinput
 
-      # 6. Seed initial test users and episodes
       - name: Seed test data
         working-directory: backend
         run: |
           python manage.py seed_users
           python manage.py import_episodes seed/episodes.csv
 
-      # 7. Run automated test suite
-      - name: Run automated test suite
+      - name: Run test suite
         working-directory: backend
-        run: |
-          python manage.py test
+        run: python manage.py test
 
-      # 8. Build Backend Docker image
-      - name: Build Backend Docker image
-        run: |
-          docker build -t daltonbigirimana5/dataset-request-desk-backend:latest ./backend
+      - name: Build Docker image
+        run: docker build -t daltonbigirimana5/dataset-request-desk-backend:latest ./backend
 
-      # 9. Push to Docker Hub on main branch push
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
@@ -97,23 +78,17 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Push Backend Docker image
+      - name: Push Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          docker push daltonbigirimana5/dataset-request-desk-backend:latest
+        run: docker push daltonbigirimana5/dataset-request-desk-backend:latest
 
-  # JOB 2: Frontend CI/CD
-  # ==========================================
   frontend-ci:
-    name: Frontend CI (Validate, Build & Package)
+    name: Frontend CI
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out repository code
-      - name: Check out repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      # 2. Set up Node.js with automatic npm caching
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
@@ -121,24 +96,17 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
-      # 3. Install frontend dependencies cleanly
       - name: Install dependencies
         working-directory: frontend
-        run: |
-          npm ci
+        run: npm ci
 
-      # 4. Build Angular production bundle to verify TypeScript & template compilation
-      - name: Build Angular application
+      - name: Build application
         working-directory: frontend
-        run: |
-          npm run build
+        run: npm run build
 
-      # 5. Build Frontend multi-stage Docker image
-      - name: Build Frontend Docker image
-        run: |
-          docker build -t daltonbigirimana5/dataset-request-desk-frontend:latest ./frontend
+      - name: Build Docker image
+        run: docker build -t daltonbigirimana5/dataset-request-desk-frontend:latest ./frontend
 
-      # 6. Push to Docker Hub on main branch push
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
@@ -146,7 +114,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Push Frontend Docker image
+      - name: Push Docker image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          docker push daltonbigirimana5/dataset-request-desk-frontend:latest
+        run: docker push daltonbigirimana5/dataset-request-desk-frontend:latest
