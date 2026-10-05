@@ -45,6 +45,9 @@ jobs:
           python-version: "3.9"
           cache: "pip"
 
+      - name: Create Log Directory
+        run: mkdir -p ci-logs
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -52,11 +55,11 @@ jobs:
 
       - name: Django checks
         working-directory: backend
-        run: python manage.py check
+        run: python manage.py check 2>&1 | tee ../ci-logs/django-check.log
 
       - name: Run migrations
         working-directory: backend
-        run: python manage.py migrate --noinput
+        run: python manage.py migrate --noinput 2>&1 | tee ../ci-logs/django-migrate.log
 
       - name: Seed test data
         working-directory: backend
@@ -66,10 +69,10 @@ jobs:
 
       - name: Run test suite
         working-directory: backend
-        run: python manage.py test
+        run: python manage.py test 2>&1 | tee ../ci-logs/django-test-suite.log
 
       - name: Build Docker image
-        run: docker build -t daltonbigirimana5/dataset-request-desk-backend:latest ./backend
+        run: docker build -t daltonbigirimana5/dataset-request-desk-backend:latest ./backend 2>&1 | tee ci-logs/docker-backend-build.log
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -82,16 +85,16 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: docker push daltonbigirimana5/dataset-request-desk-backend:latest
 
-      # Export and upload logs if the job fails
-      - name: Dump Container and Test Logs on Failure
+      # Capture all container, build, and test logs if anything fails
+      - name: Dump Container and Build Logs on Failure
         if: failure()
         run: |
           mkdir -p ci-logs
-          docker ps -a > ci-logs/docker-containers.txt 2>&1 || true
-          docker logs $(docker ps -lq) > ci-logs/last-container.log 2>&1 || true
+          docker ps -a > ci-logs/docker-containers-status.txt 2>&1 || true
+          docker logs $(docker ps -lq) > ci-logs/docker-container-runtime.log 2>&1 || true
         continue-on-error: true
 
-      - name: Upload Backend Failure Artifacts
+      - name: Upload Backend Failure Logs Artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -113,16 +116,19 @@ jobs:
           cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
+      - name: Create Log Directory
+        run: mkdir -p frontend-logs
+
       - name: Install dependencies
         working-directory: frontend
         run: npm ci
 
       - name: Build application
         working-directory: frontend
-        run: npm run build
+        run: npm run build 2>&1 | tee ../frontend-logs/angular-build.log
 
       - name: Build Docker image
-        run: docker build -t daltonbigirimana5/dataset-request-desk-frontend:latest ./frontend
+        run: docker build -t daltonbigirimana5/dataset-request-desk-frontend:latest ./frontend 2>&1 | tee frontend-logs/docker-frontend-build.log
 
       - name: Log in to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -135,13 +141,21 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: docker push daltonbigirimana5/dataset-request-desk-frontend:latest
 
-      # Upload frontend logs if build fails
-      - name: Upload Frontend Failure Artifacts
+      # Capture all container, build, and npm logs if frontend fails
+      - name: Dump Frontend Container and Build Logs on Failure
+        if: failure()
+        run: |
+          mkdir -p frontend-logs
+          docker ps -a > frontend-logs/docker-containers-status.txt 2>&1 || true
+          docker logs $(docker ps -lq) > frontend-logs/docker-container-runtime.log 2>&1 || true
+          cp frontend/*.log frontend-logs/ 2>/dev/null || true
+          cp frontend/npm-debug.log* frontend-logs/ 2>/dev/null || true
+        continue-on-error: true
+
+      - name: Upload Frontend Failure Logs Artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: frontend-failure-logs
-          path: |
-            frontend/*.log
-            frontend/npm-debug.log*
+          path: frontend-logs/
           retention-days: 7
